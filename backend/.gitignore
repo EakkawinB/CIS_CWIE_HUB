@@ -10,7 +10,3 @@ node_modules/
 # Database / Alembic local
 *.db
 *.sqlite3
-
-# IDE
-.vscode/
-.idea/
