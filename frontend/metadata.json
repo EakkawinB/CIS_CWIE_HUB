@@ -1,0 +1,8 @@
+{
+  "name": "CIS CWIE Hub",
+  "description": "Official Landing Page and Cooperative Education Management System portal for the Department of Computer Information Systems (CIS), KMUTNB.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
