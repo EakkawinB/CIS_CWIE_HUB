@@ -33,7 +33,14 @@ export function Hero() {
             className="mt-6 text-balance font-display text-4xl font-bold leading-tight tracking-tight md:text-6xl"
           >
             {t.hero.title}{' '}
-            <span className="text-primary">{t.hero.titleHighlight}</span>
+            <span
+              style={{
+                animation: "color-shift 3s ease-in-out infinite",
+                display: "inline-block",
+              }}
+            >
+              {t.hero.titleHighlight}
+            </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 24 }}

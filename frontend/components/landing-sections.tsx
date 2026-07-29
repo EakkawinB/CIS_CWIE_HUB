@@ -157,8 +157,8 @@ export function Workflow() {
 
   const steps = t.workflow.steps.map((step, index) => [
     step,
-    [UserRound, FileUp, Handshake, FileCheck2, Building2, BriefcaseBusiness, LineChart, ClipboardCheck, Flag][index],
-  ]) as const
+      [UserRound, FileUp, Handshake, FileCheck2, Building2, BriefcaseBusiness, LineChart, ClipboardCheck, Flag][index],
+    ]) as const
 
   return (
     <section id="workflow" className="py-24">

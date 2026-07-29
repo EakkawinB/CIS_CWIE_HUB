@@ -17,7 +17,7 @@ export const translations = {
     // Hero
     hero: {
       badge: 'KMUTNB Cooperative Education Platform',
-      title: 'Welcome to CIS CWIE Hub',
+      title: 'Welcome to ',
       titleHighlight: 'CIS CWIE Hub',
       subtitle: 'Cooperative and Work-Integrated Education Management System',
       description:
@@ -288,7 +288,7 @@ export const translations = {
     // Hero
     hero: {
       badge: 'แพลตฟอร์มการศึกษาร่วมสหกิจของ KMUTNB',
-      title: 'ยินดีต้อนรับสู่ CIS CWIE Hub',
+      title: 'ยินดีต้อนรับสู่ ',
       titleHighlight: 'CIS CWIE Hub',
       subtitle: 'ระบบจัดการการศึกษาร่วมสหกิจและการเรียนรู้ที่บูรณาการกับงาน',
       description:
