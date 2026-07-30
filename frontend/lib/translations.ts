@@ -175,6 +175,7 @@ export const translations = {
 
     // Login Card
     login: {
+      backHome: 'Back to Home',
       signIn: 'Sign in to CIS CWIE Hub',
       accessWorkspace: 'Access your cooperative education workspace',
       universityEmail: 'University Email',
@@ -191,6 +192,31 @@ export const translations = {
       connecting: 'Connecting...',
       accessRestricted:
         'Access is restricted to authorized KMUTNB users only. Only approved university email domains are accepted.',
+      
+      // Error Messages
+      errors: {
+        fetchFailed: 'Failed to fetch',
+        networkError: 'Network error. Please check your connection.',
+        invalidEmail: 'Please enter a valid email address',
+        invalidOTP: 'Please enter a valid 6-digit OTP',
+        otpExpired: 'OTP has expired. Please request a new one.',
+        otpInvalid: 'OTP is incorrect or expired',
+        accessDenied: 'You do not have permission to access this system',
+        userNotFound: 'Email not found in the system',
+        unknownError: 'An unexpected error occurred',
+        otpSendFailed: 'Failed to send OTP. Please try again.',
+        otpVerifyFailed: 'Failed to verify OTP. Please try again.',
+        emailRequired: 'Email address is required',
+        otpRequired: 'OTP code is required',
+      },
+
+      // Success Messages
+      success: {
+        otpSent: 'OTP sent successfully! Check your email.',
+        otpVerified: 'OTP verified successfully!',
+        loginSuccess: 'Sign in successful!',
+        operationSuccess: 'Operation successful!',
+      },
     },
 
     // Site Header
@@ -463,6 +489,31 @@ export const translations = {
       connecting: 'กำลังเชื่อมต่อ...',
       accessRestricted:
         'การเข้าถึงถูก จำกัดสำหรับผู้ใช้ KMUTNB ที่ได้รับอนุญาตเท่านั้น เฉพาะโดเมนอีเมลมหาวิทยาลัยที่ได้รับอนุญาตเท่านั้น',
+      
+      // Error Messages
+      errors: {
+        fetchFailed: 'ไม่สามารถเชื่อมต่อได้',
+        networkError: 'ข้อผิดพลาดเครือข่าย โปรดตรวจสอบการเชื่อมต่อของคุณ',
+        invalidEmail: 'โปรดป้อนที่อยู่อีเมลที่ถูกต้อง',
+        invalidOTP: 'โปรดป้อน OTP 6 หลักที่ถูกต้อง',
+        otpExpired: 'OTP หมดอายุแล้ว โปรดขอรหัสใหม่',
+        otpInvalid: 'OTP ไม่ถูกต้องหรือหมดอายุแล้ว',
+        accessDenied: 'ไม่มีสิทธิ์เข้าใช้งานระบบ',
+        userNotFound: 'ไม่พบอีเมลในระบบ',
+        unknownError: 'เกิดข้อผิดพลาดที่ไม่คาดหวัง',
+        otpSendFailed: 'ไม่สามารถส่ง OTP ได้ โปรดลองอีกครั้ง',
+        otpVerifyFailed: 'ไม่สามารถตรวจสอบ OTP ได้ โปรดลองอีกครั้ง',
+        emailRequired: 'จำเป็นต้องระบุที่อยู่อีเมล',
+        otpRequired: 'จำเป็นต้องระบุรหัส OTP',
+      },
+
+      // Success Messages
+      success: {
+        otpSent: 'ส่ง OTP สำเร็จแล้ว! ตรวจสอบอีเมลของคุณ',
+        otpVerified: 'ตรวจสอบ OTP สำเร็จแล้ว!',
+        loginSuccess: 'เข้าสู่ระบบสำเร็จแล้ว!',
+        operationSuccess: 'ดำเนินการสำเร็จแล้ว!',
+      },
     },
 
     // Site Header

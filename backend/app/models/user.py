@@ -1,5 +1,8 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Column, String, DateTime, Boolean
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.database import Base
 
@@ -7,21 +10,32 @@ from app.database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
+    user_id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        index=True
+    )
 
     email = Column(
-        String,
+        String(255),
         unique=True,
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     role = Column(
-        String,
+        String(50),
         nullable=False
     )
 
+    is_active = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
 
-    otp_codes = relationship(
-        "OTPCode",
-        backref="user"
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
     )
