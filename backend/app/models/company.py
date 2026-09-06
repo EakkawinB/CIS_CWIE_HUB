@@ -1,20 +1,21 @@
 from sqlalchemy import (
+    Boolean,
     Column,
-    Integer,
-    String
+    DateTime,
+    String,
+    func,
 )
-
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.database import Base
 
 
 class Company(Base):
-
     __tablename__ = "companies"
 
-    id = Column(
-        Integer,
+    company_id = Column(
+        UUID(as_uuid=True),
         primary_key=True
     )
 
@@ -24,19 +25,56 @@ class Company(Base):
     )
 
     email = Column(
-        String
+        String,
+        nullable=True
     )
 
     phone = Column(
-        String
+        String,
+        nullable=True
     )
 
     address = Column(
-        String
+        String,
+        nullable=True
     )
 
-    # นักศึกษาที่ฝึกงานที่บริษัทนี้
+    province = Column(
+        String,
+        nullable=True
+    )
+
+    website = Column(
+        String,
+        nullable=True
+    )
+
+    is_active = Column(
+        Boolean,
+        nullable=False,
+        default=True
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
     students = relationship(
         "Student",
+        back_populates="company"
+    )
+
+    # Company 1:N Position
+    positions = relationship(
+        "Position",
         back_populates="company"
     )

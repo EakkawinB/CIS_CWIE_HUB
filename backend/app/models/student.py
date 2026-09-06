@@ -10,6 +10,7 @@ from sqlalchemy import (
 )
 
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.database import Base
 
@@ -23,12 +24,20 @@ class Student(Base):
         primary_key=True
     )
 
+    # เชื่อมกับบัญชีกลาง
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.user_id"),
+        unique=True,
+        nullable=True   # ชั่วคราวระหว่าง migration
+    )
+
     student_id = Column(
         String,
         unique=True
     )
 
-    # ข้อมูล Login
+    # เก็บชั่วคราวจนกว่า Auth ใหม่จะเสร็จ
     email = Column(
         String(255),
         unique=True,
@@ -36,7 +45,11 @@ class Student(Base):
         index=True
     )
 
-    # ข้อมูลส่วนตัว
+    phone = Column(
+        String(30),
+        nullable=True
+    )
+
     first_name = Column(
         String(100),
         nullable=False
@@ -47,22 +60,13 @@ class Student(Base):
         nullable=False
     )
 
-    major = Column(
-        String
-    )
+    major = Column(String)
+    year = Column(Integer)
+    gpax = Column(Float)
 
-    year = Column(
-        Integer
-    )
-
-    gpax = Column(
-        Float
-    )
-
-    # ฝึกงาน
     company_id = Column(
-        Integer,
-        ForeignKey("companies.id"),
+        UUID(as_uuid=True),
+        ForeignKey("companies.company_id"),
         nullable=True
     )
 
@@ -71,13 +75,17 @@ class Student(Base):
         back_populates="students"
     )
 
-    # เอกสารของนักศึกษา
     documents = relationship(
         "Document",
         back_populates="student"
     )
 
-    # สถานะบัญชี
+    # User relationship
+    user = relationship(
+        "User",
+        back_populates="student"
+    )
+
     is_active = Column(
         Boolean,
         default=True

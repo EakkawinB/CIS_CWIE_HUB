@@ -2,7 +2,6 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
-    Boolean,
     DateTime
 )
 
@@ -27,28 +26,23 @@ class OTPCode(Base):
         index=True
     )
 
-    # 'student' | 'teacher' | 'staff'
+    # 'student' | 'advisor' | 'mentor' | 'staff'
     role = Column(
         String(20),
         nullable=False
     )
 
-    otp = Column(
+    otp_hash = Column(
         String,
         nullable=False
     )
 
-    is_used = Column(
-        Boolean,
-        default=False
-    )
-
     expired_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False
     )
 
     created_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         server_default=func.now()
     )

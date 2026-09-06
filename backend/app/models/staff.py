@@ -1,27 +1,36 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import (
+    Column,
+    String,
+    DateTime,
+    ForeignKey,
+    func,
+    text
+)
+
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy import text
 
 from app.database import Base
 
 
 class Staff(Base):
+
     __tablename__ = "staffs"
 
     staff_id = Column(
-        Integer, 
-        primary_key=True, 
-        index=True
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()")
     )
 
-    # ข้อมูล Login
-    email = Column(
-        String(255),
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.user_id"),
         unique=True,
-        nullable=False,
-        index=True
+        nullable=True
     )
 
-    # ข้อมูลส่วนตัว
     first_name = Column(
         String(100),
         nullable=False
@@ -32,10 +41,12 @@ class Staff(Base):
         nullable=False
     )
 
-    # สถานะบัญชี
-    is_active = Column(
-        Boolean,
-        default=True
+    department = Column(
+        String(150)
+    )
+
+    phone = Column(
+        String(30)
     )
 
     created_at = Column(
@@ -46,4 +57,9 @@ class Staff(Base):
     updated_at = Column(
         DateTime(timezone=True),
         onupdate=func.now()
+    )
+
+    user = relationship(
+        "User",
+        back_populates="staff"
     )

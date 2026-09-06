@@ -1,66 +1,120 @@
-import random
+import secrets
 import string
-from datetime import datetime, timedelta, timezone
+import hmac
+import hashlib
+
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
-from app.core.redis import get_redis
 from app.models.otp import OTPCode
+from app.config import settings
 
-
-OTP_TTL = 300  # 5 นาที
-
-
-def _key(email: str, role: str) -> str:
-    return f"otp:{role}:{email}"
+OTP_TTL = 100  # 10 นาที
 
 
 def _generate_otp(length: int = 6) -> str:
-    return "".join(random.choices(string.digits, k=length))
+    return "".join(secrets.choice(string.digits)
+    for _ in range(length))
 
+def _hash_otp(otp: str) -> str:
+    return hmac.new(
+        settings.SECRET_KEY.encode(),
+        otp.encode(),
+        hashlib.sha256
+    ).hexdigest()
 
 async def create_otp(email: str, role: str, db: Session) -> str:
     """
-    สร้าง OTP
-    - เก็บใน Redis (primary) TTL 5 นาที
-    - บันทึกใน DB (audit log)
+    สร้าง OTP และเก็บลง Database
     """
-    redis = await get_redis()
+
     otp = _generate_otp()
+    otp_hash = _hash_otp(otp)
 
-    # เก็บใน Redis
-    await redis.setex(_key(email, role), OTP_TTL, otp)
+    # ทำให้ OTP เก่าของ email + role ใช้ไม่ได้
+    db.query(OTPCode).filter(
+        OTPCode.email == email,
+        OTPCode.role == role
+    ).delete()
 
-    # บันทึกใน DB เป็น audit log
     record = OTPCode(
         email=email,
         role=role,
-        otp=otp,
-        expired_at=datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL)
+        otp_hash=otp_hash,
+        expired_at=datetime.utcnow() + timedelta(seconds=OTP_TTL)
     )
+
     db.add(record)
     db.commit()
 
+    #คืน otp จริงเพื่อเอาไปส่ง email
     return otp
 
 
-async def verify_otp(email: str, role: str, otp: str) -> bool:
+async def verify_otp(
+    email: str,
+    role: str,
+    otp: str,
+    db: Session
+) -> str:
     """
-    ตรวจสอบ OTP จาก Redis
-    - ถูกต้อง → ลบออกจาก Redis ทันที (ใช้ได้ครั้งเดียว)
-    - ผิด / หมดอายุ → return False
+    ตรวจสอบ OTP จาก Database
     """
-    redis = await get_redis()
-    stored = await redis.get(_key(email, role))
 
-    if not stored or stored != otp:
-        return False
+    record = db.query(OTPCode).filter(
+        OTPCode.email == email,
+        OTPCode.role == role
+    ).first()
 
-    await redis.delete(_key(email, role))
-    return True
+    print("RECORD FOUND:", record is not None)
 
+    if not record:
+        return "invalid"
 
-async def revoke_otp(email: str, role: str):
-    """ยกเลิก OTP ก่อนหมดอายุ เช่น กรณีขอ OTP ใหม่"""
-    redis = await get_redis()
-    await redis.delete(_key(email, role))
+    print("EXPIRED_AT:", record.expired_at)
+    print("NOW:", datetime.utcnow())
+
+    # เช็กหมดอายุก่อน
+    if record.expired_at < datetime.utcnow():
+        print("RESULT: EXPIRED")
+        return "expired"
+
+    incoming_hash = _hash_otp(otp)
+
+    print(
+        "HASH MATCH:",
+        hmac.compare_digest(
+            incoming_hash,
+            record.otp_hash
+        )
+    )
+
+    if not hmac.compare_digest(
+        incoming_hash,
+        record.otp_hash
+    ):
+        print("RESULT: INVALID")
+        return "invalid"
+
+    db.delete(record)
+    db.commit()
+
+    print("RESULT: SUCCESS")
+    return "success"
+
+async def revoke_otp(
+    email: str,
+    role: str,
+    db: Session
+):
+    """
+    ยกเลิก OTP เดิม
+    """
+
+    db.query(OTPCode).filter(
+        OTPCode.email == email,
+        OTPCode.role == role
+    ).delete()
+
+    db.commit()
