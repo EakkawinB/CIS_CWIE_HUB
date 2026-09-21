@@ -5,7 +5,7 @@ from app.config import settings
 from app.database import Base, engine
 
 from app import models
-from app.routers import auth, company
+from app.routers import auth, company, position
 from app.routers import student
 from app.routers import advisor
 from app.routers import mentor
@@ -60,6 +60,9 @@ app.include_router(
     company.router
 )
 
+app.include_router(
+    position.router
+)
 app.include_router(
     student.router
 )

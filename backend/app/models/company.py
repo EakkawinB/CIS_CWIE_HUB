@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     String,
+    Text,
     func,
 )
 from sqlalchemy.orm import relationship
@@ -22,6 +23,21 @@ class Company(Base):
     company_name = Column(
         String,
         nullable=False
+    )
+
+    industry = Column(
+        String,
+        nullable=True
+    )
+
+    description = Column(
+        Text,
+        nullable=True
+    )
+
+    logo_url = Column(
+        String,
+        nullable=True
     )
 
     email = Column(

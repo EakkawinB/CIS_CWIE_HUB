@@ -5,10 +5,11 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Numeric,
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -36,6 +37,16 @@ class Position(Base):
 
     description = Column(
         Text,
+        nullable=True
+    )
+
+    requirements = Column(
+        JSONB,
+        nullable=True
+    )
+
+    salary = Column(
+        Numeric(10, 2),
         nullable=True
     )
 
