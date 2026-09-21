@@ -3,7 +3,7 @@ import string
 import hmac
 import hashlib
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -42,7 +42,7 @@ async def create_otp(email: str, role: str, db: Session) -> str:
         email=email,
         role=role,
         otp_hash=otp_hash,
-        expired_at=datetime.utcnow() + timedelta(seconds=OTP_TTL)
+        expired_at=datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL)
     )
 
     db.add(record)
@@ -73,10 +73,10 @@ async def verify_otp(
         return "invalid"
 
     print("EXPIRED_AT:", record.expired_at)
-    print("NOW:", datetime.utcnow())
+    print("NOW:", datetime.now(timezone.utc))
 
     # เช็กหมดอายุก่อน
-    if record.expired_at < datetime.utcnow():
+    if record.expired_at < datetime.now(timezone.utc):
         print("RESULT: EXPIRED")
         return "expired"
 
