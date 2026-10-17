@@ -8,7 +8,7 @@ interface OTPVerificationProps {
   onVerifyError?: (error: string) => void;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function OTPVerification({
   email,
@@ -125,6 +125,7 @@ export default function OTPVerification({
     try {
       const code = otp.join('');
       const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,6 +163,7 @@ export default function OTPVerification({
     try {
       const response = await fetch(`${API_BASE_URL}/auth/request-otp`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
