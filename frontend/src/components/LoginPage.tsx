@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, ShieldCheck, Key, RefreshCw, AlertTriangle, HelpCircle, Lock, GraduationCap, Clock } from 'lucide-react';
-import { useLanguage } from '../LanguageContext';
+import { Mail, ShieldCheck, Lock, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import CISLogo from './CISLogo';
 import LanguageSwitcher from './LanguageSwitcher';
-import api from '../services/api';
-import axios from 'axios';
+import api, { getApiErrorStatus } from '../services/api';
 
 interface LoginPageProps {
   onLoginSuccess: (email: string, targetRole: 'student' | 'advisor' | 'mentor' | 'staff') => void;
@@ -12,17 +11,35 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) {
-  const { t, language } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language || 'th';
   
   // Screen sub-states: 'email' | 'otp' | 'loading' | 'expired' | 'unauthorized'
   const [subState, setSubState] = useState<'email' | 'otp' | 'loading' | 'expired' | 'unauthorized'>('email');
   
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('kasidis.p@university.edu');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [countdown, setCountdown] = useState(59);
   const [roleSelection, setRoleSelection] = useState<'student' | 'advisor' | 'mentor' | 'staff'>('student');
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
 
-  // Trigger countdown timer when on OTP screen
+  const getOtpRequestErrorMessage = (error: unknown) => {
+    const status = getApiErrorStatus(error);
+    if (status === 403) {
+      return language === 'th'
+        ? 'อีเมลนี้ไม่มีสิทธิ์เข้าใช้งานระบบ'
+        : 'This email is not authorized to use the system.';
+    }
+    if (status === 422) {
+      return language === 'th'
+        ? 'รูปแบบข้อมูลอีเมลไม่ถูกต้อง'
+        : 'The email request is invalid.';
+    }
+    return language === 'th'
+      ? 'ไม่สามารถส่ง OTP ได้ กรุณาตรวจสอบว่า Backend ทำงานอยู่แล้วลองใหม่'
+      : 'Unable to send OTP. Check that the backend is running and try again.';
+  };
+
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
 
@@ -42,61 +59,30 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      if (onNotify) {
-        onNotify(
-          language === 'th' ? 'กรุณากรอกอีเมลมหาวิทยาลัยของคุณ' : 'Please enter your university email.', 
-          'warning'
-        );
-      }
+      onNotify?.(
+        language === 'th' ? 'กรุณากรอกอีเมลมหาวิทยาลัยของคุณ' : 'Please enter your university email.', 
+        'warning'
+      );
       return;
     }
     if (!email.includes('@')) {
-      if (onNotify) {
-        onNotify(
-          language === 'th' ? 'รูปแบบอีเมลไม่ถูกต้อง' : 'Please enter a valid email address.', 
-          'error'
-        );
-      }
+      onNotify?.(
+        language === 'th' ? 'รูปแบบอีเมลไม่ถูกต้อง' : 'Please enter a valid email address.', 
+        'error'
+      );
       return;
     }
     
-    // Simulate loading transition
-    setSubState('loading');
-
     setSubState('loading');
 
     try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/auth/request-otp',
-        {
-          email: email
-        }
-      );
- 
-      console.log('Send OTP success:', response.data);
-
+      await api.post('/auth/request-otp', { email });
       setSubState('otp');
       setCountdown(59);
-
-      onNotify?.(
-        `${t('otp_sent_to')} ${email}`,
-        'success'
-      );
-
+      onNotify?.(`${t('otp_sent_to')} ${email}`, 'success');
     } catch (error) {
-
-      console.error('Send OTP error:', error);
-
       setSubState('email');
-
-      if (onNotify) {
-        onNotify(
-          language === 'th'
-            ? 'ไม่สามารถส่งรหัส OTP ได้ กรุณาลองใหม่อีกครั้ง'
-            : 'Unable to send OTP. Please try again.',
-          'error'
-        );
-      }
+      onNotify?.(getOtpRequestErrorMessage(error), 'error');
     }
   };
 
@@ -127,7 +113,6 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const joined = otp.join('');
 
     if (joined.length < 6) {
@@ -140,36 +125,29 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
       return;
     }
 
+    setSubState('loading');
+
     try {
-      setSubState('loading');
+      const response = await api.post('/auth/verify-otp', { email, otp: joined });
 
-      const response = await axios.post(
-        'http://127.0.0.1:8000/auth/verify-otp',
-        {
-          email: email,
-          otp: joined
-        }
-      );
+      const accessToken = response.data?.access_token;
 
-      console.log('Verify OTP:', response.data);
+      if (!accessToken) {
+        setSubState('otp');
+        onNotify?.(
+          language === 'th'
+            ? 'ไม่พบ Token สำหรับเข้าใช้งาน กรุณาลองเข้าสู่ระบบใหม่'
+            : 'No access token was returned. Please sign in again.',
+          'error'
+        );
+        return;
+      }
 
-      onNotify?.(
-        language === 'th'
-          ? 'เข้าสู่ระบบสำเร็จ'
-          : 'Login successful',
-        'success'
-      );
-
-      onLoginSuccess(
-        email,
-        response.data.role
-      );
-
-    } catch (error) {
-      console.error('Verify OTP error:', error);
-
+      localStorage.setItem('access_token', accessToken);
+      onNotify?.(language === 'th' ? 'เข้าสู่ระบบสำเร็จ' : 'Login successful', 'success');
+      onLoginSuccess(email, response.data.role);
+    } catch {
       setSubState('otp');
-
       onNotify?.(
         language === 'th'
           ? 'OTP ไม่ถูกต้องหรือหมดอายุแล้ว'
@@ -178,48 +156,35 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
       );
     }
   };
-  const handleResendOtp = () => {
-    setCountdown(59);
-    setOtp(['', '', '', '', '', '']);
-    if (onNotify) {
-      onNotify(
-        language === 'th' ? 'ส่งรหัสยืนยันตัวตน OTP รหัสใหม่แล้ว' : 'A fresh 6-digit security code has been sent.', 
+
+  const handleResendOtp = async () => {
+    if (isResendingOtp) return;
+
+    setIsResendingOtp(true);
+    try {
+      await api.post('/auth/request-otp', { email });
+      setCountdown(59);
+      setOtp(['', '', '', '', '', '']);
+      onNotify?.(
+        language === 'th' ? 'ส่งรหัสยืนยันตัวตน OTP รหัสใหม่แล้ว' : 'A fresh 6-digit security code has been sent.',
         'success'
       );
-    }
-  };
-
-  const triggerExpiredScreen = () => {
-    setSubState('expired');
-    if (onNotify) {
-      onNotify(
-        language === 'th' ? 'เซสชันหมดอายุเนื่องจากไม่มีกิจกรรมใดๆ' : 'Session expired due to inactivity.', 
-        'warning'
-      );
-    }
-  };
-
-  const triggerUnauthorizedScreen = () => {
-    setSubState('unauthorized');
-    if (onNotify) {
-      onNotify(
-        language === 'th' ? 'ไม่ได้รับการตรวจสอบสิทธิ์ การเข้าถึงล้มเหลว' : 'Access cleared role check failed.', 
-        'error'
-      );
+    } catch (error) {
+      onNotify?.(getOtpRequestErrorMessage(error), 'error');
+    } finally {
+      setIsResendingOtp(false);
     }
   };
 
   const handleQuickAutofill = (selectedEmail: string, selectedRole: 'student' | 'advisor' | 'mentor' | 'staff') => {
     setEmail(selectedEmail);
     setRoleSelection(selectedRole);
-    if (onNotify) {
-      onNotify(
-        language === 'th' 
-          ? `ป้อนข้อมูลบัญชี ${selectedEmail} อัตโนมัติเรียบร้อย` 
-          : `Autofilled credentials for ${selectedEmail}`, 
-        'info'
-      );
-    }
+    onNotify?.(
+      language === 'th' 
+        ? `ป้อนข้อมูลบัญชี ${selectedEmail} อัตโนมัติเรียบร้อย` 
+        : `Autofilled credentials for ${selectedEmail}`, 
+      'info'
+    );
   };
 
   return (
@@ -253,7 +218,7 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@university.edu"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white rounded-xl text-xs text-slate-800 outline-none transition-colors"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#6B122C] focus:bg-white rounded-xl text-xs text-slate-800 outline-none transition-colors"
                 />
                 <Mail className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
               </div>
@@ -265,24 +230,24 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
             </div>
 
             {/* Quick Demo Selector for Testing Roles */}
-            <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-xl space-y-2">
-              <label className="block text-[11px] font-semibold text-blue-800">
-                {language === 'th' ? 'จำลองบทบาทการเข้าสู่ระบบ' : 'Simulated Portal Access Role'}
+            <div className="p-3 bg-rose-50/50 border border-rose-100 rounded-xl space-y-2">
+              <label className="block text-[11px] font-semibold text-[#6B122C]">
+                {language === 'th' ? 'จำลองบทบาทการเข้าสู่ระบบ (สำหรับทดสอบ)' : 'Simulated Portal Access Role (Testing)'}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { key: 'student', label: t('student_role'), email: 'kasidis.p@university.edu' },
                   { key: 'advisor', label: t('advisor_role'), email: 'advisor.somchai@university.edu' },
-                  { key: 'supervisor', label: t('supervisor_role'), email: 'somsak.p@nexatech.co.th' },
+                  { key: 'mentor', label: t('mentor_role'), email: 'somsak.p@nexatech.co.th' },
                   { key: 'staff', label: t('staff_role'), email: 'cwie.center@university.edu' }
                 ].map((role) => (
                   <button
                     key={role.key}
                     type="button"
                     onClick={() => handleQuickAutofill(role.email, role.key as any)}
-                    className={`px-2 py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center ${
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-semibold border transition-all text-center cursor-pointer ${
                       roleSelection === role.key 
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
+                        ? 'bg-[#6B122C] text-white border-[#6B122C] shadow-xs' 
                         : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
@@ -294,26 +259,28 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+              className="w-full py-2.5 bg-[#6B122C] hover:bg-[#580E24] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer text-center"
             >
               {t('send_otp')}
             </button>
           </form>
 
-          {/* Diagnostic utilities to show other required screen designs */}
+          {/* Diagnostic utilities */}
           <div className="border-t border-slate-100 pt-4 mt-2 flex flex-col gap-2">
             <span className="text-[9px] font-mono text-slate-400 text-center uppercase tracking-wider block">
-              {language === 'th' ? 'ภาพตัวอย่างหน้าจออื่นๆ (สำหรับตรวจสอบ)' : 'Screen Prototypes Viewports (For Inspection)'}
+              {language === 'th' ? 'ภาพตัวอย่างสถานะเซสชัน' : 'Session Invalidation Tests'}
             </span>
             <div className="grid grid-cols-2 gap-2 text-center">
               <button 
-                onClick={triggerExpiredScreen}
+                type="button"
+                onClick={() => setSubState('expired')}
                 className="text-[10px] text-amber-600 hover:underline flex items-center justify-center gap-1 border border-amber-100 bg-amber-50/20 py-1 rounded-lg cursor-pointer"
               >
                 <Clock className="h-3 w-3" /> {language === 'th' ? 'เซสชันหมดอายุ' : 'Session Expired'}
               </button>
               <button 
-                onClick={triggerUnauthorizedScreen}
+                type="button"
+                onClick={() => setSubState('unauthorized')}
                 className="text-[10px] text-rose-600 hover:underline flex items-center justify-center gap-1 border border-rose-100 bg-rose-50/20 py-1 rounded-lg cursor-pointer"
               >
                 <Lock className="h-3 w-3" /> {language === 'th' ? 'ไม่ได้รับอนุญาต' : 'Unauthorized'}
@@ -327,7 +294,7 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
       {subState === 'otp' && (
         <div className="bg-white border border-slate-100 p-5 sm:p-8 rounded-2xl shadow-lg max-w-md w-full text-left space-y-6">
           <div className="text-center space-y-2">
-            <div className="inline-flex h-12 w-12 bg-blue-50 text-blue-600 rounded-xl items-center justify-center">
+            <div className="inline-flex h-12 w-12 bg-rose-50 text-[#6B122C] rounded-xl items-center justify-center border border-rose-100">
               <ShieldCheck className="h-6 w-6" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 font-sans">
@@ -335,10 +302,10 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
             </h2>
             <p className="text-xs text-slate-500 leading-relaxed">
               {language === 'th' 
-                ? `ระบบส่งรหัส 6 หลักไปยังอีเมลเรียบร้อยแล้ว: ` 
+                ? 'ระบบส่งรหัส 6 หลักไปยังอีเมลเรียบร้อยแล้ว: ' 
                 : 'Dispatched 6-digit code to '} 
-              <span className="font-semibold text-slate-700 break-all">{email}</span>. 
-              {language === 'th' ? ' มีอายุการใช้งาน 10 นาที' : ' Valid for 10 minutes.'}
+              <span className="font-semibold text-slate-700 break-all">{email}</span>
+              {language === 'th' ? ' รหัสมีอายุ 10 นาที' : ' The code is valid for 10 minutes.'}
             </p>
           </div>
 
@@ -354,24 +321,26 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
                     onChange={(e) => handleOtpChange(e.target, index)}
                     onKeyDown={(e) => handleOtpKeyDown(e, index)}
                     onFocus={(e) => e.target.select()}
-                    className="flex-1 min-w-0 h-10 sm:h-12 max-w-[44px] bg-slate-50 border-2 border-slate-200 focus:border-blue-600 focus:bg-white rounded-lg sm:rounded-xl text-center font-bold text-slate-800 text-base sm:text-lg outline-none transition-all"
+                    className="flex-1 min-w-0 h-10 sm:h-12 max-w-[44px] bg-slate-50 border-2 border-slate-200 focus:border-[#6B122C] focus:bg-white rounded-lg sm:rounded-xl text-center font-bold text-slate-800 text-base sm:text-lg outline-none transition-all"
                   />
                 ))}
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] sm:text-xs text-slate-400 gap-2 mt-2">
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 text-blue-500 animate-pulse" />
-                  {language === 'th' ? 'รหัสจะหมดอายุใน: ' : 'Code expires in: '} 
+                  <Clock className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
+                  {language === 'th' ? 'ส่งรหัสใหม่ได้ใน: ' : 'Resend available in: '}
                   <span className="font-mono font-semibold text-slate-600">0:{countdown < 10 ? `0${countdown}` : countdown}</span>
                 </span>
                 <button
                   type="button"
-                  disabled={countdown > 0}
+                  disabled={countdown > 0 || isResendingOtp}
                   onClick={handleResendOtp}
-                  className={`font-semibold hover:underline cursor-pointer text-left ${countdown > 0 ? 'text-slate-300 cursor-not-allowed' : 'text-blue-600'}`}
+                  className={`font-semibold hover:underline cursor-pointer text-left ${countdown > 0 || isResendingOtp ? 'text-slate-300 cursor-not-allowed' : 'text-[#6B122C]'}`}
                 >
-                  {language === 'th' ? 'ส่งรหัสใหม่อีกครั้ง' : 'Resend OTP Code'}
+                  {isResendingOtp
+                    ? (language === 'th' ? 'กำลังส่ง...' : 'Sending...')
+                    : (language === 'th' ? 'ส่งรหัสใหม่อีกครั้ง' : 'Resend OTP Code')}
                 </button>
               </div>
             </div>
@@ -386,7 +355,7 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+                className="flex-1 py-2 sm:py-2.5 bg-[#6B122C] hover:bg-[#580E24] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer text-center"
               >
                 {t('verify_signin')}
               </button>
@@ -399,7 +368,7 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
       {subState === 'loading' && (
         <div className="bg-white border border-slate-100 p-12 rounded-2xl shadow-lg max-w-sm w-full text-center space-y-4">
           <div className="flex justify-center">
-            <RefreshCw className="h-8 w-8 text-blue-600 animate-spin" />
+            <RefreshCw className="h-8 w-8 text-[#6B122C] animate-spin" />
           </div>
           <h3 className="font-bold text-slate-800 text-sm">
             {language === 'th' ? 'กำลังตรวจสอบคีย์ความปลอดภัย...' : 'Validating Security Tokens'}
@@ -419,7 +388,7 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
             <AlertTriangle className="h-6 w-6" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900 font-sans font-semibold">
+            <h2 className="text-lg font-bold text-slate-900 font-sans">
               {language === 'th' ? 'เซสชันการเชื่อมต่อหมดอายุ' : 'Session Invalidation Alert'}
             </h2>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -430,7 +399,7 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
           </div>
           <button
             onClick={() => setSubState('email')}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2.5 bg-[#6B122C] hover:bg-[#580E24] text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
           >
             {language === 'th' ? 'รับรหัส OTP ชุดใหม่' : 'Re-initiate Verification Code'}
           </button>
@@ -444,13 +413,13 @@ export default function LoginPage({ onLoginSuccess, onNotify }: LoginPageProps) 
             <Lock className="h-6 w-6" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900 font-sans font-semibold">
+            <h2 className="text-lg font-bold text-slate-900 font-sans">
               {language === 'th' ? 'ปฏิเสธการเข้าถึงห้องข้อมูล' : 'Access Clearance Rejected'}
             </h2>
             <p className="text-xs text-slate-500 leading-relaxed">
               {language === 'th' 
                 ? 'คุณไม่มีระดับสิทธิ์การเข้าถึงสารสนเทศระบบงานนี้ กรุณาเลือกสถานะบทบาทการเชื่อมต่อวิชาการให้เหมาะสม' 
-                : 'You do not have the required role clearance to view this directory. Ensure you have selected the appropriate role parameters and verified using your official university credentials.'}
+                : 'You do not have the required role clearance to view this directory.'}
             </p>
           </div>
           <button

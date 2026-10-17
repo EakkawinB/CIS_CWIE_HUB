@@ -1,21 +1,29 @@
-export type Role = 'guest' | 'student' | 'advisor' | 'mentor' | 'staff' | 'login' | 'design-system';
+export type Role =
+  | 'guest'
+  | 'login'
+  | 'student'
+  | 'advisor'
+  | 'mentor'
+  | 'staff'
+  | 'design-system';
 
-export interface Student {
+// ---- Position ----
+export interface Position {
   id: string;
-  name: string;
-  email: string;
-  gpa: number;
-  major: string;
-  academicYear: string;
-  status: 'Unassigned' | 'Matching' | 'Confirmed' | 'Completed';
-  companyId?: string;
-  advisorId?: string;
-  supervisorId?: string;
-  skills: string[];
-  resumeUrl?: string;
-  progress: number; // 0 to 100
+  title: string;
+  titleTh?: string;
+  slots: number;
+  filled: number;
+  salary: string;
+  salaryTh?: string;
+  description: string;
+  descriptionTh?: string;
+  requirements: string[];
+  requirementsTh?: string[];
+  status: 'open' | 'closed';
 }
 
+// ---- Company ----
 export interface Company {
   id: string;
   name: string;
@@ -23,37 +31,46 @@ export interface Company {
   industryTh?: string;
   location: string;
   locationTh?: string;
-  logoColor: string;
-  description: string;
-  descriptionTh?: string;
-  positions: Position[];
   rating: number;
-}
-
-export interface Position {
-  id: string;
-  title: string;
-  titleTh?: string;
-  slots: number;
-  filled: number;
   description: string;
   descriptionTh?: string;
-  requirements: string[];
-  requirementsTh?: string[];
-  salary: string;
-  salaryTh?: string;
-  tags: string[];
+  logoColor: string;
+  positions: Position[];
+  mouStatus?: 'Active' | 'Expired' | 'Pending';
 }
 
+// ---- Student ----
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
+  major: string;
+  academicYear: string;
+  gpa: number;
+  skills: string[];
+  companyId?: string;
+  progress: number;
+  status: 'Confirmed' | 'Pending' | 'Rejected' | 'Not Placed' | 'Approved' | 'Placed';
+  programType: 'Regular' | 'Special' | 'Bilingual'; // ปกติ | สมทบ | สองภาษา
+  resumeUrl?: string;
+  advisorId?: string;
+  mentorId?: string;
+  advisorName?: string;
+  mentorName?: string;
+  internshipPeriod?: { startDate: string; endDate: string };
+}
+
+// ---- Weekly Report ----
 export interface WeeklyReport {
   id: string;
   studentId: string;
+  studentName?: string;
   weekNumber: number;
   startDate: string;
   endDate: string;
   summary: string;
-  achievements: string;
-  obstacles: string;
+  achievements?: string;
+  obstacles?: string;
   hoursWorked: number;
   status: 'Pending' | 'Approved' | 'Requires Edit';
   advisorComment?: string;
@@ -61,218 +78,274 @@ export interface WeeklyReport {
   submittedAt: string;
 }
 
+// ---- Timesheet ----
 export interface Timesheet {
   id: string;
   studentId: string;
+  studentName?: string;
   weekNumber: number;
   startDate: string;
   endDate: string;
   hoursWorked: number;
   status: 'Pending' | 'Approved' | 'Rejected';
-  fileUrl?: string;
   fileName?: string;
   approvedBy?: string;
   submittedAt: string;
 }
 
+// ---- Document ----
 export interface Document {
   id: string;
   name: string;
-  category: 'Agreement' | 'Report' | 'Evaluation' | 'General';
-  status: 'Missing' | 'Submitted' | 'Approved' | 'Action Required';
-  fileSize?: string;
+  category: 'Agreement' | 'Report' | 'Evaluation' | 'Resume';
+  status: 'Approved' | 'Submitted' | 'Action Required' | 'Missing';
+  studentId?: string;
+  studentName?: string;
   uploadedAt?: string;
+  fileSize?: string;
   feedback?: string;
+  fileName?: string;
 }
 
-export interface Examination {
-  studentId: string;
-  status: 'Not Scheduled' | 'Scheduled' | 'Completed';
-  date?: string;
-  time?: string;
-  room?: string;
+// ---- ExaminationInfo ----
+export interface ExaminationInfo {
+  date: string;
+  time: string;
+  room: string;
+  chair: string;
   committee: string[];
   checkedIn: boolean;
-  score?: number; // max 100
-  feedback?: string;
+  scoreCriteria?: { name: string; maxScore: number }[];
+  materials?: string[];
 }
 
-export interface WorkspaceEmail {
-  id: string;
-  sender: string;
-  subject: string;
-  snippet: string;
-  date: string;
-  read: boolean;
-}
-
-export interface WorkspaceEvent {
-  id: string;
-  title: string;
-  start: string;
-  end: string;
-  type: 'academic' | 'cwie' | 'exam' | 'visit';
-}
-
-export interface WorkspaceDoc {
+// ---- AdvisorInfo ----
+export interface AdvisorInfo {
   id: string;
   name: string;
-  lastModified: string;
-  url: string;
+  email: string;
+  title: string;
+  department: string;
+  credentials: string;
+  assignedStudentIds: string[];
+  visitCountRound1?: boolean;
+  visitCountRound2?: boolean;
 }
 
-// REALISTIC MOCK DATA
+// ---- MentorInfo ----
+export interface MentorInfo {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  companyId: string;
+  role: string;
+  assignedStudentIds: string[];
+}
+
+// ---- CoopTimelineStage ----
+export interface CoopTimelineStage {
+  id: string;
+  stepNumber: number;
+  title: string;
+  titleTh: string;
+  dateRange: string;
+  status: 'completed' | 'current' | 'upcoming';
+  desc: string;
+  descTh: string;
+}
+
+// Initial Mock Data
+
 export const MOCK_STUDENTS: Student[] = [
   {
     id: 'STU001',
-    name: 'Kasidis Phromsorn',
+    name: 'กษิดิศ พรหมศร (Kasidis Phromsorn)',
     email: 'kasidis.p@university.edu',
+    major: 'ระบบสารสนเทศคอมพิวเตอร์ (CIS)',
+    academicYear: 'ปีการศึกษา 2569 (ชั้นปีที่ 4)',
     gpa: 3.82,
-    major: 'Computer Information Systems',
-    academicYear: '4th Year',
-    status: 'Confirmed',
-    companyId: 'COMP01',
-    advisorId: 'ADV01',
-    supervisorId: 'SUP01',
     skills: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js', 'PostgreSQL'],
+    companyId: 'COMP01',
     progress: 75,
+    status: 'Confirmed',
+    programType: 'Regular',
+    resumeUrl: 'Resume_Kasidis_Phromsorn_2026.pdf',
+    advisorId: 'ADV001',
+    mentorId: 'MEN001',
+    internshipPeriod: { startDate: '2026-06-01', endDate: '2026-09-18' }
   },
   {
     id: 'STU002',
-    name: 'Natapat Kittisukhon',
+    name: 'ณัฐภัทร กิตติสุคนธ์ (Natapat Kittisukhon)',
     email: 'natapat.k@university.edu',
-    gpa: 3.45,
-    major: 'Software Engineering',
-    academicYear: '4th Year',
-    status: 'Matching',
+    major: 'วิศวกรรมซอฟต์แวร์ (SE)',
+    academicYear: 'ปีการศึกษา 2569 (ชั้นปีที่ 4)',
+    gpa: 3.65,
+    skills: ['Java', 'Spring Boot', 'Docker', 'Kubernetes'],
     companyId: 'COMP02',
-    advisorId: 'ADV01',
-    skills: ['Vue.js', 'Java Spring Boot', 'MySQL', 'Docker'],
     progress: 40,
+    status: 'Confirmed',
+    programType: 'Special',
+    resumeUrl: 'Resume_Natapat_K_2026.pdf',
+    advisorId: 'ADV001',
+    mentorId: 'MEN002'
   },
   {
     id: 'STU003',
-    name: 'Piyabutr Wongkaew',
-    email: 'piyabutr.w@university.edu',
-    gpa: 3.12,
-    major: 'Computer Information Systems',
-    academicYear: '4th Year',
-    status: 'Unassigned',
-    skills: ['Python', 'Django', 'Data Analysis', 'Tableau'],
-    progress: 10,
+    name: 'วรภพ รัตนโชติ (Vorapop Rattanachote)',
+    email: 'vorapop.r@university.edu',
+    major: 'เทคโนโลยีสารสนเทศ (IT)',
+    academicYear: 'ปีการศึกษา 2569 (ชั้นปีที่ 4)',
+    gpa: 3.45,
+    skills: ['Python', 'FastAPI', 'Machine Learning', 'SQL'],
+    companyId: 'COMP01',
+    progress: 60,
+    status: 'Confirmed',
+    programType: 'Bilingual',
+    resumeUrl: 'Resume_Vorapop_R_2026.pdf',
+    advisorId: 'ADV002',
+    mentorId: 'MEN001'
   },
   {
     id: 'STU004',
-    name: 'Chayanit Srisuwan',
-    email: 'chayanit.s@university.edu',
-    gpa: 3.91,
-    major: 'Computer Information Systems',
-    academicYear: '4th Year',
-    status: 'Confirmed',
-    companyId: 'COMP03',
-    advisorId: 'ADV02',
-    supervisorId: 'SUP02',
-    skills: ['UX/UI Design', 'Figma', 'React Native', 'Tailwind CSS'],
-    progress: 90,
+    name: 'พิชญุตม์ ธนะสัมบูรณ์ (Pichayut Thanasomboon)',
+    email: 'pichayut.t@university.edu',
+    major: 'ระบบสารสนเทศคอมพิวเตอร์ (CIS)',
+    academicYear: 'ปีการศึกษา 2569 (ชั้นปีที่ 4)',
+    gpa: 3.12,
+    skills: ['HTML5', 'CSS3', 'Vue.js', 'Figma'],
+    companyId: undefined,
+    progress: 10,
+    status: 'Not Placed',
+    programType: 'Regular',
+    resumeUrl: 'Resume_Pichayut_T_Draft.pdf',
+    advisorId: 'ADV002'
   }
 ];
 
 export const MOCK_COMPANIES: Company[] = [
   {
     id: 'COMP01',
-    name: 'NexaTech Solutions',
-    industry: 'Enterprise Software & Cloud Services',
-    industryTh: 'ซอฟต์แวร์ระดับองค์กรและบริการคลาวด์',
-    location: 'District 1, Bangkok Tech Corridor',
-    locationTh: 'เขต 1, กรุงเทพฯ เทค คอริดอร์',
-    logoColor: 'from-blue-600 to-indigo-600',
-    description: 'NexaTech is a pioneering SaaS enterprise specializing in cloud-native operational management databases and real-time logistics networks.',
-    descriptionTh: 'NexaTech เป็นบริษัทผู้บุกเบิกด้าน Enterprise SaaS ที่เชี่ยวชาญด้านระบบฐานข้อมูลการจัดการบนคลาวด์เนทีฟและเครือข่ายโลจิสติกส์แบบเรียลไทม์',
-    rating: 4.8,
+    name: 'NexaTech Solutions Co., Ltd.',
+    industry: 'Enterprise Software & Cloud Architecture',
+    industryTh: 'ซอฟต์แวร์ระดับองค์กรและคลาวด์',
+    location: 'Bangkok (Silom / BTS Chong Nonsi)',
+    locationTh: 'กรุงเทพมหานคร (สีลม / BTS ช่องนนทรี)',
+    rating: 4.9,
+    description: 'Leading provider of enterprise cloud-native applications, real-time analytics platforms, and microservice engineering for financial institutions.',
+    descriptionTh: 'ผู้นำด้านการพัฒนาแอปพลิเคชันระดับองค์กรบนคลาวด์ แพลตฟอร์มการวิเคราะห์ข้อมูลแบบเรียลไทม์ และสถาปัตยกรรมไมโครเซอร์วิสสำหรับสถาบันการเงิน',
+    logoColor: 'from-blue-700 to-indigo-800',
     positions: [
       {
         id: 'POS01',
-        title: 'Frontend Engineer (React)',
-        titleTh: 'วิศวกรฟรอนต์เอนด์ (React)',
+        title: 'Frontend Developer Intern (React/TypeScript)',
+        titleTh: 'นักศึกษาฝึกงานพัฒนาฟรอนต์เอนด์ (React/TypeScript)',
         slots: 2,
-        filled: 1,
-        description: 'Build robust, highly performant web application components using React 19, TypeScript, and modern design systems.',
-        descriptionTh: 'พัฒนาคอมโพเนนต์เว็บแอปพลิเคชันที่มีประสิทธิภาพสูงและเสถียร โดยใช้ React 19, TypeScript และระบบการออกแบบที่ทันสมัย',
-        requirements: ['Strong understanding of React & hook states', 'CSS frameworks (Tailwind preferred)', 'Understanding of RESTful JSON APIs'],
-        requirementsTh: ['มีความเข้าใจอย่างลึกซึ้งเกี่ยวกับ React และ Hook State', 'มีความชำนาญในการใช้ CSS Frameworks (พิจารณา Tailwind CSS เป็นพิเศษ)', 'มีความเข้าใจเกี่ยวกับการเชื่อมต่อ RESTful JSON APIs'],
-        salary: '18,000 - 22,000 THB/month',
-        salaryTh: '18,000 - 22,000 บาท/เดือน',
-        tags: ['React', 'TypeScript', 'Tailwind'],
+        filled: 2,
+        salary: '600 THB/day allowance',
+        salaryTh: '600 บาท/วัน (มีเบี้ยเลี้ยง)',
+        description: 'Collaborate with senior software architects to implement performant, design-system-compliant responsive dashboards.',
+        descriptionTh: 'ร่วมงานกับทีมวิศวกรซอฟต์แวร์อาวุโสในการพัฒนาแดชบอร์ดความเร็วสูงที่ตอบสนองทุกอุปกรณ์ตามระบบการออกแบบ',
+        requirements: [
+          'Solid understanding of React 18+ and TypeScript',
+          'Familiarity with Tailwind CSS and state management',
+          'Git version control proficiency'
+        ],
+        requirementsTh: [
+          'เข้าใจ React 18+ และ TypeScript เป็นอย่างดี',
+          'คุ้นเคยกับ Tailwind CSS และการจัดการสถานะ',
+          'ใช้ Git คล่องแคล่ว'
+        ],
+        status: 'open'
       },
       {
         id: 'POS02',
-        title: 'DevOps & Systems Assistant',
-        titleTh: 'ผู้ช่วยฝ่ายวิศวกรรมระบบและเดฟออปส์',
+        title: 'Full Stack Engineer Intern (Node.js/PostgreSQL)',
+        titleTh: 'นักศึกษาฝึกงานวิศวกรฟูลสแต็ก (Node.js/PostgreSQL)',
         slots: 1,
-        filled: 0,
-        description: 'Support cloud-native container workloads in Kubernetes and assist with Continuous Integration workflows.',
-        descriptionTh: 'สนับสนุนและดูแลโครงสร้างระบบตู้คอนเทนเนอร์ (Container Workloads) บน Kubernetes และช่วยเหลืองานด้านกระบวนการ Continuous Integration (CI/CD)',
-        requirements: ['Basic Linux shell command line experience', 'Docker container understanding', 'Familiarity with Git'],
-        requirementsTh: ['มีประสบการณ์พื้นฐานการใช้งาน Linux command line', 'มีความเข้าใจระบบตู้คอนเทนเนอร์ด้วย Docker', 'มีความคุ้นเคยกับระบบควบคุมเวอร์ชัน Git'],
-        salary: '20,000 THB/month',
-        salaryTh: '20,000 บาท/เดือน',
-        tags: ['Docker', 'AWS', 'Linux'],
+        filled: 1,
+        salary: '650 THB/day allowance',
+        salaryTh: '650 บาท/วัน (มีเบี้ยเลี้ยง)',
+        description: 'Design robust RESTful APIs, manage schema migrations in PostgreSQL, and build background workers.',
+        descriptionTh: 'ออกแบบ RESTful API จัดการโครงสร้างฐานข้อมูล PostgreSQL และพัฒนาระบบ Background Worker',
+        requirements: [
+          'Node.js/Express or NestJS experience',
+          'Relational database SQL indexing skills'
+        ],
+        requirementsTh: [
+          'มีประสบการณ์ Node.js/Express หรือ NestJS',
+          'มีความรู้ด้านฐานข้อมูลเชิงสัมพันธ์และ SQL'
+        ],
+        status: 'closed'
       }
     ]
   },
   {
     id: 'COMP02',
-    name: 'Linear Digital Corp',
-    industry: 'Financial Technology & Agile Products',
-    industryTh: 'เทคโนโลยีทางการเงินและผลิตภัณฑ์ดิจิทัล',
-    location: 'Sathorn Financial District, Bangkok',
-    locationTh: 'ย่านการเงินสาทร, กรุงเทพฯ',
-    logoColor: 'from-slate-800 to-slate-950',
-    description: 'A modern, Linear-inspired digital products builder focused on crafting gorgeous user interfaces and solid distributed banking protocols.',
-    descriptionTh: 'ผู้พัฒนาผลิตภัณฑ์ดิจิทัลยุคใหม่ที่ได้รับแรงบันดาลใจจากสไตล์มินิมอล มุ่งเน้นการออกแบบยูสเซอร์อินเตอร์เฟสที่สวยงามและโปรโตคอลระบบการเงินแบบกระจายศูนย์ที่มีความเสถียร',
-    rating: 4.9,
+    name: 'Linear Digital Innovations',
+    industry: 'Financial Technology (FinTech)',
+    industryTh: 'เทคโนโลยีทางการเงิน (FinTech)',
+    location: 'Bangkok (Sathorn / MRT Lumphini)',
+    locationTh: 'กรุงเทพมหานคร (สาทร / MRT ลุมพินี)',
+    rating: 4.8,
+    description: 'Specialized in high-frequency transaction processing, payment gateways, and cryptographic ledger integrity.',
+    descriptionTh: 'เชี่ยวชาญด้านการประมวลผลธุรกรรมความเร็วสูง เกตเวย์การชำระเงิน และระบบการจัดการความปลอดภัยทางดิจิทัล',
+    logoColor: 'from-indigo-600 to-blue-800',
     positions: [
       {
         id: 'POS03',
-        title: 'Fullstack Software Intern',
-        titleTh: 'นักศึกษาฝึกงานพัฒนาซอฟต์แวร์แบบฟูลสแต็ก',
-        slots: 3,
+        title: 'Backend Platform Engineer Intern',
+        titleTh: 'นักศึกษาฝึกงานวิศวกรแพลตฟอร์มแบ็กเอนด์',
+        slots: 2,
         filled: 1,
-        description: 'Implement back-to-front features in fullstack Node.js environments. Work directly under senior engineering architects.',
-        descriptionTh: 'พัฒนาฟีเจอร์ทั้งฝั่งหน้าบ้านและหลังบ้านในสภาพแวดล้อม Node.js โดยทำงานร่วมกับสถาปนิกซอฟต์แวร์อาวุโสโดยตรง',
-        requirements: ['Node.js/Express experience', 'Relational database familiarity (Postgres)', 'Willingness to learn agile workflows'],
-        requirementsTh: ['มีประสบการณ์การใช้งาน Node.js และ Express', 'มีความคุ้นเคยกับระบบฐานข้อมูลเชิงสัมพันธ์ เช่น PostgreSQL', 'มีความกระตือรือร้นในการเรียนรู้กระบวนการทำงานแบบ Agile'],
-        salary: '22,000 THB/month',
-        salaryTh: '22,000 บาท/เดือน',
-        tags: ['Node.js', 'Postgres', 'Vue'],
+        salary: '700 THB/day allowance',
+        salaryTh: '700 บาท/วัน (มีเบี้ยเลี้ยง)',
+        description: 'Develop distributed service endpoints and integrate secure authentication protocols.',
+        descriptionTh: 'พัฒนา Service Endpoint แบบกระจายศูนย์และเชื่อมต่อโปรโตคอลความปลอดภัยในการยืนยันตัวตน',
+        requirements: [
+          'Java, Go, or Node.js background',
+          'Understanding of async event streams and queues'
+        ],
+        requirementsTh: [
+          'มีความรู้พื้นฐาน Java, Go หรือ Node.js',
+          'เข้าใจระบบ Event Stream และ Message Queue'
+        ],
+        status: 'open'
       }
     ]
   },
   {
     id: 'COMP03',
-    name: 'Vortex Studio',
-    industry: 'Digital Experience & Creative Tech',
-    industryTh: 'ประสบการณ์ดิจิทัลและเทคโนโลยีสร้างสรรค์',
-    location: 'Sukhumvit Soi 21, Bangkok',
-    locationTh: 'สุขุมวิท ซอย 21, กรุงเทพฯ',
-    logoColor: 'from-violet-600 to-fuchsia-600',
-    description: 'Vortex is a creative studio merging the boundaries of high-fidelity UX/UI design with modern interactive graphics and spatial products.',
-    descriptionTh: 'สตูดิโอสร้างสรรค์ที่ผสานขีดจำกัดของการออกแบบ UX/UI ความละเอียดสูง เข้ากับกราฟิกแบบอินเตอร์แอคทีฟที่ทันสมัยและผลิตภัณฑ์เชิงพื้นที่ดิจิทัล',
-    rating: 4.6,
+    name: 'Vortex Studio Labs',
+    industry: 'Creative Tech & AI Solutions',
+    industryTh: 'เทคโนโลยีสร้างสรรค์และปัญญาประดิษฐ์',
+    location: 'Bangkok (Asok / BTS Asok)',
+    locationTh: 'กรุงเทพมหานคร (อโศก / BTS อโศก)',
+    rating: 4.7,
+    description: 'Building next-generation generative AI interfaces, interactive data visualizations, and modern mobile tooling.',
+    descriptionTh: 'พัฒนาอินเทอร์เฟซปัญญาประดิษฐ์ยุคใหม่ การสร้างภาพข้อมูลเชิงโต้ตอบ และเครื่องมือโมบายล์สมัยใหม่',
+    logoColor: 'from-sky-600 to-blue-700',
     positions: [
       {
         id: 'POS04',
-        title: 'UI/UX Designer Intern',
-        titleTh: 'นักศึกษาฝึกงานออกแบบ UI/UX',
-        slots: 2,
-        filled: 1,
-        description: 'Translate complicated workflows into beautiful, seamless interactive design systems. Create high-fidelity Figma prototypes.',
-        descriptionTh: 'แปลงกระบวนการทำงานที่ซับซ้อนให้กลายเป็นระบบการออกแบบเชิงโต้ตอบที่สวยงามและใช้งานง่าย สร้างชิ้นงานจำลองความละเอียดสูงบน Figma',
-        requirements: ['Outstanding portfolio in Figma', 'Solid grip on grids, typography, and visual hierarchy', 'Basic knowledge of frontend limitations'],
-        requirementsTh: ['มีผลงานการออกแบบที่โดดเด่นโดยใช้โปรแกรม Figma', 'มีความรู้ความเข้าใจที่แน่นหนาเรื่อง Grid, Typography และการจัดลำดับความสำคัญของภาพ', 'มีความรู้พื้นฐานเกี่ยวกับข้อจำกัดทางเทคนิคฝั่ง Frontend'],
-        salary: '15,000 - 18,000 THB/month',
-        salaryTh: '15,000 - 18,000 บาท/เดือน',
-        tags: ['Figma', 'UX Research', 'Design System'],
+        title: 'AI Interface & Design Engineer Intern',
+        titleTh: 'นักศึกษาฝึกงานออกแบบอินเทอร์เฟซและปัญญาประดิษฐ์',
+        slots: 1,
+        filled: 0,
+        salary: '600 THB/day allowance',
+        salaryTh: '600 บาท/วัน (มีเบี้ยเลี้ยง)',
+        description: 'Prototype intelligent AI experiences, prompt engineering pipelines, and intuitive UI components.',
+        descriptionTh: 'สร้างต้นแบบประสบการณ์การใช้งาน AI และออกแบบคอมโพเนนต์ UI ที่ใช้งานง่าย',
+        requirements: [
+          'Modern UI/UX prototyping skills',
+          'Basic experience interacting with LLM APIs'
+        ],
+        requirementsTh: [
+          'มีทักษะการสร้างต้นแบบ UI/UX',
+          'มีประสบการณ์เชื่อมต่อ API ปัญญาประดิษฐ์'
+        ],
+        status: 'open'
       }
     ]
   }
@@ -282,44 +355,47 @@ export const MOCK_REPORTS: WeeklyReport[] = [
   {
     id: 'REP001',
     studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
     weekNumber: 1,
     startDate: '2026-06-01',
     endDate: '2026-06-05',
-    summary: 'Onboarded into NexaTech frontend team. Configured workspace with pnpm and set up local development servers. Explored the central codebase structure.',
-    achievements: 'Set up development environment in under 4 hours. Solved 2 minor layout bugs in the client dashboard dashboard.',
-    obstacles: 'Getting access permissions for the internal repository took some back-and-forth emails, but was resolved on Tuesday.',
+    summary: 'Onboarding with the frontend engineering team. Configured local Docker development environment and reviewed codebase architecture.',
+    achievements: 'Setup local workspace, completed security compliance training, merged first UI bugfix PR.',
+    obstacles: 'Configuring SSO environment tokens took longer than anticipated.',
     hoursWorked: 40,
     status: 'Approved',
-    advisorComment: 'Great start, Kasidis! Keep maintaining this clean log format.',
-    supervisorComment: 'Kasidis adapted very quickly to our development environment. Promising start.',
-    submittedAt: '2026-06-05T17:00:00Z',
+    advisorComment: 'Good start. Ensure you document your environment setup steps in your technical appendix.',
+    supervisorComment: 'Quick learner, completed onboarding tasks ahead of schedule.',
+    submittedAt: '2026-06-05T17:00:00Z'
   },
   {
     id: 'REP002',
     studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
     weekNumber: 2,
     startDate: '2026-06-08',
     endDate: '2026-06-12',
-    summary: 'Assigned to rebuild the main company analytical tables. Designed custom table filter views using responsive layouts.',
-    achievements: 'Delivered the table filter components 2 days ahead of schedule, with perfect CSS transitions.',
-    obstacles: 'Struggled slightly with custom memoization arrays in useEffect to avoid excess re-renders, but refactored it after senior review.',
+    summary: 'Developed user profile management modal component and synchronized responsive styling across desktop and tablet views.',
+    achievements: 'Created 4 reusable form components in Figma-to-React workflow.',
+    obstacles: 'Handling edge cases in form validation required additional testing.',
     hoursWorked: 40,
     status: 'Approved',
-    advisorComment: 'Excellent technical progress. Good utilization of state.',
-    submittedAt: '2026-06-12T17:15:00Z',
+    advisorComment: 'Well structured. Please remember to record user experience metrics.',
+    submittedAt: '2026-06-12T17:00:00Z'
   },
   {
     id: 'REP003',
     studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
     weekNumber: 3,
     startDate: '2026-06-15',
     endDate: '2026-06-19',
-    summary: 'Began building interactive analytics charts showing real-time container CPU stats. Experimented with pure custom SVGs.',
-    achievements: 'Successfully created fully interactive charts with responsive scales.',
-    obstacles: 'SVG resizing challenges on mobile, but resolved by adding a ResizeObserver wrapper.',
+    summary: 'Optimized rendering performance of the live transaction dashboard. Implemented virtualized list for data feeds exceeding 1,000 items.',
+    achievements: 'Reduced initial render lag by 45% using useMemo and memoization hooks.',
+    obstacles: 'Scroll sync between header and virtualized table rows.',
     hoursWorked: 40,
     status: 'Pending',
-    submittedAt: '2026-06-19T16:50:00Z',
+    submittedAt: '2026-06-19T17:00:00Z'
   }
 ];
 
@@ -327,73 +403,261 @@ export const MOCK_TIMESHEETS: Timesheet[] = [
   {
     id: 'TS001',
     studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
     weekNumber: 1,
     startDate: '2026-06-01',
     endDate: '2026-06-05',
     hoursWorked: 40,
     status: 'Approved',
     fileName: 'timesheet_week_1_kasidis.pdf',
-    approvedBy: 'Supervisor Somsak (SUP01)',
-    submittedAt: '2026-06-05T17:05:00Z',
+    approvedBy: 'Khun Somsak (Mentor Lead)',
+    submittedAt: '2026-06-05T18:00:00Z'
   },
   {
     id: 'TS002',
     studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
     weekNumber: 2,
     startDate: '2026-06-08',
     endDate: '2026-06-12',
     hoursWorked: 40,
     status: 'Approved',
     fileName: 'timesheet_week_2_kasidis.pdf',
-    approvedBy: 'Supervisor Somsak (SUP01)',
-    submittedAt: '2026-06-12T17:20:00Z',
+    approvedBy: 'Khun Somsak (Mentor Lead)',
+    submittedAt: '2026-06-12T18:00:00Z'
   },
   {
     id: 'TS003',
     studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
     weekNumber: 3,
     startDate: '2026-06-15',
     endDate: '2026-06-19',
     hoursWorked: 40,
     status: 'Pending',
     fileName: 'timesheet_week_3_kasidis.pdf',
-    submittedAt: '2026-06-19T17:00:00Z',
+    submittedAt: '2026-06-19T18:00:00Z'
   }
 ];
 
 export const MOCK_DOCUMENTS: Document[] = [
-  { id: 'DOC01', name: 'CWIE_Application_Form_signed.pdf', category: 'Agreement', status: 'Approved', fileSize: '1.2 MB', uploadedAt: '2026-05-10 14:22' },
-  { id: 'DOC02', name: 'Letter_of_Acceptance_NexaTech.pdf', category: 'Agreement', status: 'Approved', fileSize: '450 KB', uploadedAt: '2026-05-18 10:05' },
-  { id: 'DOC03', name: 'Weekly_Progress_Summary_Signed_W1-2.pdf', category: 'Report', status: 'Approved', fileSize: '2.1 MB', uploadedAt: '2026-06-12 17:30' },
-  { id: 'DOC04', name: 'Supervisor_Evaluation_Form_70_Percent.pdf', category: 'Evaluation', status: 'Missing' },
-  { id: 'DOC05', name: 'Cooperative_Final_Report_Draft.docx', category: 'Report', status: 'Action Required', fileSize: '4.8 MB', uploadedAt: '2026-07-01 11:40', feedback: 'Please update chapter 3 with the revised system architecture diagram and clarify the evaluation metrics.' }
+  {
+    id: 'DOC01',
+    name: 'ใบตอบรับการเข้าปฏิบัติงานสหกิจศึกษา (CWIE Acceptance Agreement)',
+    category: 'Agreement',
+    status: 'Approved',
+    studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
+    uploadedAt: '2026-05-18',
+    fileSize: '2.4 MB',
+    fileName: 'CWIE_Agreement_NexaTech_Signed.pdf'
+  },
+  {
+    id: 'DOC02',
+    name: 'หนังสือขอความอนุเคราะห์และส่งตัวนักศึกษา (University Endorsement Letter)',
+    category: 'Agreement',
+    status: 'Approved',
+    studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
+    uploadedAt: '2026-05-22',
+    fileSize: '1.2 MB',
+    fileName: 'University_Endorsement_STU001.pdf'
+  },
+  {
+    id: 'DOC03',
+    name: 'แบบฟอร์มประเมินผลกลางภาคสหกิจศึกษา (Midterm Evaluation Form)',
+    category: 'Evaluation',
+    status: 'Action Required',
+    studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
+    uploadedAt: '2026-07-20',
+    fileSize: '850 KB',
+    feedback: 'Mentor signature missing on page 3. Please re-upload with official stamp.',
+    fileName: 'Midterm_Evaluation_Draft.pdf'
+  },
+  {
+    id: 'DOC04',
+    name: 'สไลด์นำเสนอการสอบปากเปล่าโครงงาน (Defense Slides)',
+    category: 'Report',
+    status: 'Submitted',
+    studentId: 'STU001',
+    studentName: 'กษิดิศ พรหมศร',
+    uploadedAt: '2026-08-01',
+    fileSize: '12.8 MB',
+    fileName: 'Kasidis_Final_CWIE_Presentation.pdf'
+  }
 ];
 
-export const MOCK_EXAM: Examination = {
-  studentId: 'STU001',
-  status: 'Scheduled',
+export const MOCK_EXAM: ExaminationInfo = {
   date: '2026-08-15',
-  time: '10:00 AM - 12:00 PM',
-  room: 'CIS Advanced Computing Lab, Room 604',
-  committee: ['Asst. Prof. Dr. Chitsutha Soomlek (Chairperson)', 'Dr. Wittawat Chantharaphirak (Committee)', 'Khun Somsak Pipatpatana (Supervisor)'],
+  time: '10:00 - 11:30 น.',
+  room: 'ห้อง 604 ศูนย์คอมพิวเตอร์ อาคารคณะวิทยาศาสตร์ประยุกต์',
+  chair: 'ผศ.ดร.ชิดสุธา สุ่มเล็ก (Asst. Prof. Dr. Chitsutha Soomlek)',
+  committee: [
+    'ผศ.ดร.ชิดสุธา สุ่มเล็ก (ประธานกรรมการสอบ)',
+    'ดร.สมชาย ศรีสุวรรณ (อาจารย์ที่ปรึกษาหลัก)',
+    'ดร.วิทวัส จันทร์ทราภิรักษ์ (กรรมการผู้ทรงคุณวุฒิ)',
+    'คุณสมศักดิ์ พิพัฒน์พัฒนา (ผู้แทนจากสถานประกอบการ / Mentor)'
+  ],
   checkedIn: false,
+  materials: ['สไลด์นำเสนอ (PDF)', 'เล่มรายงานโครงงานฉบับสมบูรณ์ (PDF)']
 };
 
-export const MOCK_EMAILS: WorkspaceEmail[] = [
-  { id: 'EM01', sender: 'cwie.center@university.edu', subject: 'Urgent: Complete your Supervisor midterm evaluation', snippet: 'Dear Student, please make sure your supervisor logs in to complete the 70% evaluation form before...', date: 'Jul 11, 2026', read: false },
-  { id: 'EM02', sender: 'somsak.p@nexatech.co.th', subject: 'Feedback on layout rebuild task', snippet: 'Hi Kasidis, the layout for the analytical tables looks clean. Let’s do a brief walkthrough this Monday at...', date: 'Jul 10, 2026', read: true },
-  { id: 'EM03', sender: 'advisor.somchai@university.edu', subject: 'Scheduled CWIE Site Supervision Visit', snippet: 'Hello Kasidis and Somsak, I have confirmed our supervision visit date for July 25 at NexaTech. Please prepare...', date: 'Jul 08, 2026', read: true }
+export const MOCK_ADVISORS: AdvisorInfo[] = [
+  {
+    id: 'ADV001',
+    name: 'ดร.สมชาย ศรีสุวรรณ (Dr. Somchai Srisuwan)',
+    email: 'somchai.s@university.edu',
+    title: 'Associate Professor of Computer Information Systems',
+    department: 'ภาควิชาระบบสารสนเทศคอมพิวเตอร์ประยุกต์',
+    credentials: 'Ph.D. in Distributed Software Architectures, KMUTNB',
+    assignedStudentIds: ['STU001', 'STU002'],
+    visitCountRound1: true,
+    visitCountRound2: false
+  },
+  {
+    id: 'ADV002',
+    name: 'ดร.วิทวัส จันทร์ทราภิรักษ์ (Dr. Wittawat Chantharaphirak)',
+    email: 'wittawat.c@university.edu',
+    title: 'Assistant Professor of Information Technology',
+    department: 'ภาควิชาระบบสารสนเทศคอมพิวเตอร์ประยุกต์',
+    credentials: 'Ph.D. in Information Systems & Cloud Security, Chulalongkorn Univ.',
+    assignedStudentIds: ['STU003', 'STU004'],
+    visitCountRound1: false,
+    visitCountRound2: false
+  }
 ];
 
-export const MOCK_EVENTS: WorkspaceEvent[] = [
-  { id: 'EV01', title: 'Submit Weekly Report Week 6', start: '2026-07-17T17:00:00', end: '2026-07-17T18:00:00', type: 'cwie' },
-  { id: 'EV02', title: 'Midterm Site Supervision Visit', start: '2026-07-25T13:30:00', end: '2026-07-25T15:30:00', type: 'visit' },
-  { id: 'EV03', title: 'Final Report Slides Submission Deadline', start: '2026-08-05T23:59:00', end: '2026-08-06T00:00:00', type: 'academic' },
-  { id: 'EV04', title: 'CIS CWIE Examination Presentation', start: '2026-08-15T10:00:00', end: '2026-08-15T12:00:00', type: 'exam' }
+export const MOCK_MENTORS: MentorInfo[] = [
+  {
+    id: 'MEN001',
+    name: 'คุณสมศักดิ์ พิพัฒน์พัฒนา (Khun Somsak Pipatpatana)',
+    email: 'somsak@nexatech.com',
+    company: 'NexaTech Solutions Co., Ltd.',
+    companyId: 'COMP01',
+    role: 'Senior Full-Stack Lead & Industrial Mentor',
+    assignedStudentIds: ['STU001', 'STU003']
+  },
+  {
+    id: 'MEN002',
+    name: 'คุณธีรพงศ์ อนันตชิต (Khun Teerapong Anantachit)',
+    email: 'teerapong@lineardigital.io',
+    company: 'Linear Digital Innovations',
+    companyId: 'COMP02',
+    role: 'Lead Cloud Architect & Mentor',
+    assignedStudentIds: ['STU002']
+  }
 ];
 
-export const MOCK_WORKSPACE_DOCS: WorkspaceDoc[] = [
-  { id: 'WD01', name: 'CIS_CWIE_Final_Report_Template.docx', lastModified: 'May 02, 2026', url: 'https://docs.google.com/document/d/1' },
-  { id: 'WD02', name: 'Weekly_Timesheet_Blank_Template.xlsx', lastModified: 'May 04, 2026', url: 'https://docs.google.com/spreadsheets/d/2' },
-  { id: 'WD03', name: 'CWIE_Evaluation_Criteria_Rubric_v2.pdf', lastModified: 'Jun 10, 2026', url: 'https://drive.google.com/file/d/3' }
+export const MOCK_TIMELINE_STAGES: CoopTimelineStage[] = [
+  {
+    id: 'STAGE01',
+    stepNumber: 1,
+    title: 'Placement Offer & Company Agreement',
+    titleTh: 'การตอบรับเข้าฝึกงานและสัญญาจ้าง 3 ฝ่าย',
+    dateRange: '10 พ.ค. 2569',
+    status: 'completed',
+    desc: 'Accepted placement offer at NexaTech Solutions. Agreement signed by student, university, and company.',
+    descTh: 'ได้รับการตอบรับเข้าปฏิบัติงานที่บริษัท NexaTech Solutions และลงนามหนังสือข้อตกลง 3 ฝ่ายเรียบร้อย'
+  },
+  {
+    id: 'STAGE02',
+    stepNumber: 2,
+    title: 'Co-op Visit Round 1 (Early Supervision)',
+    titleTh: 'การนิเทศงานรอบที่ 1 (ติดตามความก้าวหน้าช่วงต้น)',
+    dateRange: '25 ก.ค. 2569',
+    status: 'completed',
+    desc: 'Academic advisor visits student and company mentor on-site to review onboarding progress and work duties.',
+    descTh: 'อาจารย์ที่ปรึกษาเข้าเยี่ยมนิเทศงาน ณ สถานประกอบการ ติดตามความก้าวหน้าและข้อตกลงการทำงาน'
+  },
+  {
+    id: 'STAGE03',
+    stepNumber: 3,
+    title: 'Co-op Visit Round 2 (Midterm / Project Audit)',
+    titleTh: 'การนิเทศงานรอบที่ 2 (ประเมินความก้าวหน้าโครงงาน)',
+    dateRange: '8 ส.ค. 2569',
+    status: 'current',
+    desc: 'Advisor conducts secondary evaluation visit. Reviews student project draft and mentor feedback.',
+    descTh: 'อาจารย์ที่ปรึกษาเข้านิเทศงานรอบที่ 2 ตรวจร่างรายงานโครงงานและรับฟังข้อเสนอแนะจากพี่เลี้ยง'
+  },
+  {
+    id: 'STAGE04',
+    stepNumber: 4,
+    title: 'Oral Presentation Defense & Final Evaluation',
+    titleTh: 'การสอบป้องกันโครงงานและการประเมินผลคะแนน',
+    dateRange: '15 ส.ค. 2569',
+    status: 'upcoming',
+    desc: 'Oral defense presentation in front of academic committee and company supervisor. Final grade issued.',
+    descTh: 'นำเสนอผลงานโครงงานต่อหน้าคณะกรรมการสอบและผู้แทนสถานประกอบการ ตัดเกรดสหกิจศึกษา'
+  }
+];
+
+// Preserved for dev/preview utility
+
+export const MOCK_EMAILS = [
+  {
+    id: 'MAIL01',
+    sender: 'cwie.center@university.edu',
+    subject: 'Official CWIE Matching Confirmation - NexaTech Solutions',
+    snippet: 'Your application for Frontend Engineering Intern has been approved and matched.',
+    date: 'July 10',
+    read: false
+  },
+  {
+    id: 'MAIL02',
+    sender: 'advisor.somchai@university.edu',
+    subject: 'Cooperative Supervision Visit 1 Confirmed',
+    snippet: 'I have confirmed our supervision audit session on-site at NexaTech office.',
+    date: 'July 08',
+    read: true
+  }
+];
+
+export const MOCK_EVENTS = [
+  {
+    id: 'EV01',
+    title: 'Midterm Co-op Visit Round 1',
+    start: '2026-07-25T13:30:00',
+    type: 'visit' as const
+  },
+  {
+    id: 'EV02',
+    title: 'Final Oral Examination Defense',
+    start: '2026-08-15T10:00:00',
+    type: 'exam' as const
+  }
+];
+
+export const MOCK_WORKSPACE_DOCS = [
+  {
+    id: 'WSDOC01',
+    name: 'CWIE_Agreement_Template_2026.docx',
+    lastModified: '2026-05-01'
+  },
+  {
+    id: 'WSDOC02',
+    name: 'Weekly_Timesheet_Blank.xlsx',
+    lastModified: '2026-05-10'
+  }
+];
+
+export const MOCK_BOOKINGS = [
+  {
+    id: 1,
+    studentName: 'กษิดิศ พรหมศร (STU001)',
+    company: 'NexaTech Solutions Co., Ltd.',
+    date: '2026-07-25',
+    time: '13:30',
+    round: 1,
+    status: 'Confirmed'
+  },
+  {
+    id: 2,
+    studentName: 'นริศรา สุวรรณโชติ (STU002)',
+    company: 'Linear Digital Innovations',
+    date: '2026-07-28',
+    time: '10:00',
+    round: 1,
+    status: 'Scheduled'
+  }
 ];

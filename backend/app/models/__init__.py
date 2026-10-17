@@ -10,3 +10,6 @@ from app.models.company import Company
 from app.models.document import Document
 from app.models.staff import Staff
 from app.models.position import Position
+from app.models.application import StudentApplication
+from app.models.internship import Internship
+from app.models.advisor_assignment import AdvisorStudentAssignment

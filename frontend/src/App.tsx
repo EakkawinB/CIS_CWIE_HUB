@@ -9,12 +9,12 @@ import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import StudentPortal from './components/StudentPortal';
 import AdvisorPortal from './components/AdvisorPortal';
-import SupervisorPortal from './components/SupervisorPortal';
+import MentorPortal from './components/MentorPortal';
 import StaffPortal from './components/StaffPortal';
 import DesignSystem from './components/DesignSystem';
 import WorkspaceSync from './components/WorkspaceSync';
 import { Role } from './types';
-import { LanguageProvider, useLanguage } from './LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 interface Toast {
   id: string;
@@ -24,9 +24,7 @@ interface Toast {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <AppContent />
   );
 }
 
@@ -37,7 +35,10 @@ function AppContent() {
   // Toast list state
   const [toasts, setToasts] = useState<Toast[]>([]);
   
-  const { language, setLanguage, t } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // [i18next] ADDED: current language
+  const language = i18n.language.startsWith('th') ? 'th' : 'en';
 
   // Function to add a toast notification
   const addToast = (message: string, type: 'success' | 'info' | 'warning' | 'error' = 'success') => {
@@ -61,6 +62,7 @@ function AppContent() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('access_token');
     setRole('guest');
     addToast(t('logged_out'), 'info');
   };
@@ -121,7 +123,7 @@ function AppContent() {
           }`}
           title="Preview Corporate Supervisor 70% scoring sheet"
         >
-          💼 {t('supervisor')}
+          💼 {t('mentor')}
         </button>
 
         <button
@@ -146,8 +148,9 @@ function AppContent() {
 
         <div className="flex items-center gap-1 border-l border-slate-200 pl-3 ml-1 shrink-0">
           <button
-            onClick={() => {
-              setLanguage('en');
+            onClick={async () => {
+              await i18n.changeLanguage('en');
+              localStorage.setItem('cwie_language', 'en');
               addToast(t('switch_lang'), 'success');
             }}
             className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
@@ -157,9 +160,10 @@ function AppContent() {
             EN
           </button>
           <button
-            onClick={() => {
-              setLanguage('th');
-              addToast('เปลี่ยนภาษาเป็นภาษาไทยสำเร็จ', 'success');
+            onClick={async () => {
+              await i18n.changeLanguage('th');
+              localStorage.setItem('cwie_language', 'th');
+              addToast(t('switch_lang'), 'success');
             }}
             className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
               language === 'th' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
@@ -204,7 +208,7 @@ function AppContent() {
           )}
 
           {role === 'mentor' && (
-            <SupervisorPortal 
+            <MentorPortal
               onNotify={addToast} 
               onLogout={handleLogout} 
             />

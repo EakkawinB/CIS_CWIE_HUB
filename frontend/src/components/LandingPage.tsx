@@ -1,6 +1,6 @@
 import React from 'react';
 import { Shield, Sparkles, Calendar, BookOpen, GraduationCap, Users, FileCheck, ArrowRight, Compass, Award } from 'lucide-react';
-import { useLanguage } from '../LanguageContext';
+import { useTranslation } from 'react-i18next';
 import CISLogo from './CISLogo';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -10,7 +10,7 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onStartLogin, onExploreDesignSystem }: LandingPageProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <div className="bg-slate-50/50 min-h-screen flex flex-col font-sans" id="landing-page-root">

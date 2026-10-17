@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     EMAIL_ADDRESS: str | None = None
     EMAIL_PASSWORD: str | None = None
 
+    SUPABASE_URL: str | None = None
+    SUPABASE_SECRET_KEY: str | None = None
+    SUPABASE_STORAGE_BUCKET: str | None = None
+
 
     class Config:
         env_file = BASE_DIR / ".env"

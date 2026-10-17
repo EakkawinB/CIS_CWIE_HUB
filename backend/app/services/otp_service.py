@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.models.otp import OTPCode
 from app.config import settings
 
-OTP_TTL = 100  # 10 นาที
+OTP_TTL = 600  # 10 นาที
 
 
 def _generate_otp(length: int = 6) -> str:

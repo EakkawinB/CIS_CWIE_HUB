@@ -2,10 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import Base, engine
 
 from app import models
-from app.routers import auth, company, position
+from app.routers import (
+    application,
+    advisor_assignment,
+    auth,
+    company,
+    document,
+    position,
+    staff_application,
+)
 from app.routers import student
 from app.routers import advisor
 from app.routers import mentor
@@ -14,8 +21,6 @@ from app.routers import staff
 
 
 from app.routers.email_test import router as email_test_router
-
-Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
@@ -77,6 +82,22 @@ app.include_router(
 
 app.include_router(
     staff.router
+)
+
+app.include_router(
+    document.router
+)
+
+app.include_router(
+    application.router
+)
+
+app.include_router(
+    staff_application.router
+)
+
+app.include_router(
+    advisor_assignment.router
 )
 
 app.include_router(email_test_router, prefix="/email")

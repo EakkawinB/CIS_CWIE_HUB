@@ -46,4 +46,3 @@ class PositionResponse(BaseModel):
     end_date: date | None = None
     status: str
 
-    \ No newline at end of file

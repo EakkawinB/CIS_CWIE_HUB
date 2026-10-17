@@ -172,4 +172,3 @@ def delete_position(
 
     return None
 
-    \ No newline at end of file
