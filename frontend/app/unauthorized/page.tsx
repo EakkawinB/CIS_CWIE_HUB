@@ -10,7 +10,7 @@ export default function UnauthorizedPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4"
+      className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4"
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
