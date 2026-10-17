@@ -11,12 +11,12 @@ export function Hero() {
   const t = getTranslation(language)
 
   return (
-    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
+    <section className="relative overflow-hidden pt-32 pb-40 md:pt-40 md:pb-48 lg:pb-28">
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 right-0 size-[420px] rounded-full bg-secondary/10 blur-3xl" />
-        <div className="absolute top-40 -left-24 size-[360px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -top-24 right-0 size-105 rounded-full bg-secondary/10 blur-3xl" />
+        <div className="absolute top-40 -left-24 size-90 rounded-full bg-primary/10 blur-3xl" />
       </div>
-      <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 lg:grid-cols-2 lg:px-8">
+      <div className="mx-auto grid max-w-7xl items-start gap-14 px-5 lg:grid-cols-2 lg:px-8">
         <div>
           <motion.span
             initial={{ opacity: 0, y: 12 }}
@@ -83,7 +83,7 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.95, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative"
+          className="relative mt-8 lg:mt-0"
         >
           <motion.div
             animate={{ y: [0, -12, 0] }}
@@ -119,7 +119,7 @@ export function Hero() {
           <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute -bottom-6 -left-6 hidden rounded-xl border border-border bg-background p-4 shadow-xl md:block"
+            className="absolute -bottom-16 right-0 hidden w-48 rounded-xl border border-border bg-background p-4 shadow-xl md:block"
           >
             <p className="text-2xl font-bold text-primary">100%</p>
             <p className="text-xs text-muted-foreground">{t.dashboard.paperlessWorkflow}</p>

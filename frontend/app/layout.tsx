@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
 import { LanguageProvider } from '@/lib/language-context'
+import { AuthProvider } from '@/lib/auth-context'
 import './globals.css'
 
 const _display = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-display' })
@@ -28,8 +29,10 @@ export default function RootLayout({
     <html lang="en" className={`${_display.variable} ${_sans.variable} bg-background`}>
       <body className="font-sans antialiased">
         <LanguageProvider>
-          {children}
-          {process.env.NODE_ENV === 'production' && <Analytics />}
+          <AuthProvider>
+            {children}
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

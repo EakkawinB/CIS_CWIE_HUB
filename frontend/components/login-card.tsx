@@ -101,6 +101,8 @@ export function LoginCard() {
     setAuthLoadingMessage(getLoadingMessage('verifyOtp', language))
 
     try {
+      const { useAuth } = await import('@/lib/auth-context')
+      // Note: Can't use hook directly here, but authApi.verifyOtp handles the API call
       const response = await authApi.verifyOtp(email, otp)
       console.log('OTP verified successfully:', response)
       setSuccess(true)
