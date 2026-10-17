@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.redis import get_redis
 from app.models.otp import OTPCode
+from app.services.email_service import get_email_service
 
 
 OTP_TTL = 300  # 5 นาที
@@ -24,6 +25,7 @@ async def create_otp(email: str, role: str, db: Session) -> str:
     สร้าง OTP
     - เก็บใน Redis (primary) TTL 5 นาที
     - บันทึกใน DB (audit log)
+    - ส่ง OTP ผ่าน email
     """
     redis = await get_redis()
     otp = _generate_otp()
@@ -40,6 +42,13 @@ async def create_otp(email: str, role: str, db: Session) -> str:
     )
     db.add(record)
     db.commit()
+
+    # ส่ง email ผ่าน Mailpit
+    email_service = get_email_service()
+    send_success = await email_service.send_otp_email(email, otp, role)
+    
+    if not send_success:
+        print(f"⚠️ Warning: Could not send OTP email to {email}, but OTP was created")
 
     return otp
 

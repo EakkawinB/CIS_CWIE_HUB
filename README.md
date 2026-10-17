@@ -13,6 +13,7 @@ The system supports the entire CWIE workflow, including company management, stud
 - Python (v3.9+) for backend  
 - Redis for OTP storage
 - PostgreSQL/Supabase for database
+- Docker (for Mailpit - optional but recommended)
 
 ### Installation & Running
 
@@ -20,21 +21,28 @@ The system supports the entire CWIE workflow, including company management, stud
 
 **Quick:**
 ```bash
-# Terminal 1: Backend
+# Terminal 1: Mailpit (OTP Email Testing)
+.\run-mailpit.ps1
+
+# Terminal 2: Backend
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# Terminal 2: Frontend
+# Terminal 3: Frontend
 cd frontend
 npm install
 npm run dev
 
-# Terminal 3: Redis (if local)
+# Terminal 4: Redis (if local)
 redis-server
 ```
 
 Then visit: **http://localhost:3000**
+
+**✅ Test OTP Email:**
+- See [OTP_EMAIL_TEST.md](./OTP_EMAIL_TEST.md) for testing guide
+- See [MAILPIT_SETUP.md](./MAILPIT_SETUP.md) for Mailpit configuration
 
 ### Automated Startup (Windows)
 ```powershell

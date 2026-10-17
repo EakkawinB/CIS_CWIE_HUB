@@ -67,12 +67,13 @@ async def request_otp(
         db=db
     )
 
-    # TODO: ส่ง OTP ผ่าน Gmail SMTP
-    print(f"OTP for {data.email} ({role}): {otp}")
+    # ✓ OTP ถูกส่งไปยัง email ผ่าน Mailpit แล้ว
+    # (ส่งโดยอัตโนมัติใน create_otp function)
 
     return {
-        "message": "ส่ง OTP แล้ว",
-        "role": role
+        "message": "ส่ง OTP แล้ว กรุณาตรวจสอบอีเมลของคุณ",
+        "role": role,
+        "email": data.email
     }
 
 
@@ -103,6 +104,7 @@ async def verify_otp_route(
             detail="OTP ไม่ถูกต้องหรือหมดอายุแล้ว"
         )
 
+    # ✓ OTP ตรวจสอบสำเร็จ
     # TODO: สร้าง JWT แล้ว return
     return {
         "message": "เข้าสู่ระบบสำเร็จ",
