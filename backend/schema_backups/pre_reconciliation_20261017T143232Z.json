@@ -1,0 +1,516 @@
+{
+  "alembic_version": [
+    "31837ced408a"
+  ],
+  "constraints": [
+    {
+      "constraint_name": "advisors_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (advisor_id)",
+      "table_name": "advisors",
+      "validated": true
+    },
+    {
+      "constraint_name": "advisors_user_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(user_id)",
+      "table_name": "advisors",
+      "validated": true
+    },
+    {
+      "constraint_name": "advisors_user_id_key",
+      "constraint_type": "u",
+      "definition": "UNIQUE (user_id)",
+      "table_name": "advisors",
+      "validated": true
+    },
+    {
+      "constraint_name": "alembic_version_pkc",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (version_num)",
+      "table_name": "alembic_version",
+      "validated": true
+    },
+    {
+      "constraint_name": "companies_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (company_id)",
+      "table_name": "companies",
+      "validated": true
+    },
+    {
+      "constraint_name": "documents_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "documents",
+      "validated": true
+    },
+    {
+      "constraint_name": "documents_student_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES students(id)",
+      "table_name": "documents",
+      "validated": true
+    },
+    {
+      "constraint_name": "ck_internships_closure_metadata",
+      "constraint_type": "c",
+      "definition": "CHECK (status::text = 'placed'::text AND closed_at IS NULL AND closed_by_staff_id IS NULL OR status::text = 'closed'::text AND closed_at IS NOT NULL AND closed_by_staff_id IS NOT NULL)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "ck_internships_date_range",
+      "constraint_type": "c",
+      "definition": "CHECK (start_date IS NULL OR end_date IS NULL OR end_date >= start_date)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "ck_internships_status",
+      "constraint_type": "c",
+      "definition": "CHECK (status::text = ANY (ARRAY['placed'::character varying, 'closed'::character varying]::text[]))",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "fk_internships_matching_application",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (application_id, student_id, position_id) REFERENCES student_applications(application_id, student_id, position_id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "internships_closed_by_staff_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (closed_by_staff_id) REFERENCES staffs(staff_id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "internships_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (internship_id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "internships_position_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (position_id) REFERENCES positions(position_id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "internships_student_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES students(id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "uq_internships_application_id",
+      "constraint_type": "u",
+      "definition": "UNIQUE (application_id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "uq_internships_student_id",
+      "constraint_type": "u",
+      "definition": "UNIQUE (student_id)",
+      "table_name": "internships",
+      "validated": true
+    },
+    {
+      "constraint_name": "mentors_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (mentor_id)",
+      "table_name": "mentors",
+      "validated": true
+    },
+    {
+      "constraint_name": "mentors_user_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(user_id)",
+      "table_name": "mentors",
+      "validated": true
+    },
+    {
+      "constraint_name": "mentors_user_id_key",
+      "constraint_type": "u",
+      "definition": "UNIQUE (user_id)",
+      "table_name": "mentors",
+      "validated": true
+    },
+    {
+      "constraint_name": "otp_codes_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "otp_codes",
+      "validated": true
+    },
+    {
+      "constraint_name": "positions_company_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (company_id) REFERENCES companies(company_id)",
+      "table_name": "positions",
+      "validated": true
+    },
+    {
+      "constraint_name": "positions_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (position_id)",
+      "table_name": "positions",
+      "validated": true
+    },
+    {
+      "constraint_name": "staffs_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (staff_id)",
+      "table_name": "staffs",
+      "validated": true
+    },
+    {
+      "constraint_name": "staffs_user_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(user_id)",
+      "table_name": "staffs",
+      "validated": true
+    },
+    {
+      "constraint_name": "staffs_user_id_key",
+      "constraint_type": "u",
+      "definition": "UNIQUE (user_id)",
+      "table_name": "staffs",
+      "validated": true
+    },
+    {
+      "constraint_name": "ck_student_applications_status",
+      "constraint_type": "c",
+      "definition": "CHECK (status::text = ANY (ARRAY['applied'::character varying, 'interview_scheduled'::character varying, 'waiting_result'::character varying, 'accepted'::character varying, 'rejected'::character varying]::text[]))",
+      "table_name": "student_applications",
+      "validated": true
+    },
+    {
+      "constraint_name": "student_applications_outcome_recorded_by_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (outcome_recorded_by) REFERENCES staffs(staff_id)",
+      "table_name": "student_applications",
+      "validated": true
+    },
+    {
+      "constraint_name": "student_applications_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (application_id)",
+      "table_name": "student_applications",
+      "validated": true
+    },
+    {
+      "constraint_name": "student_applications_position_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (position_id) REFERENCES positions(position_id)",
+      "table_name": "student_applications",
+      "validated": true
+    },
+    {
+      "constraint_name": "student_applications_student_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES students(id)",
+      "table_name": "student_applications",
+      "validated": true
+    },
+    {
+      "constraint_name": "uq_student_applications_identity",
+      "constraint_type": "u",
+      "definition": "UNIQUE (application_id, student_id, position_id)",
+      "table_name": "student_applications",
+      "validated": true
+    },
+    {
+      "constraint_name": "students_company_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (company_id) REFERENCES companies(company_id)",
+      "table_name": "students",
+      "validated": true
+    },
+    {
+      "constraint_name": "students_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "students",
+      "validated": true
+    },
+    {
+      "constraint_name": "students_student_id_key",
+      "constraint_type": "u",
+      "definition": "UNIQUE (student_id)",
+      "table_name": "students",
+      "validated": true
+    },
+    {
+      "constraint_name": "students_user_id_fkey",
+      "constraint_type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(user_id)",
+      "table_name": "students",
+      "validated": true
+    },
+    {
+      "constraint_name": "students_user_id_key",
+      "constraint_type": "u",
+      "definition": "UNIQUE (user_id)",
+      "table_name": "students",
+      "validated": true
+    },
+    {
+      "constraint_name": "teachers_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "teachers",
+      "validated": true
+    },
+    {
+      "constraint_name": "users_pkey",
+      "constraint_type": "p",
+      "definition": "PRIMARY KEY (user_id)",
+      "table_name": "users",
+      "validated": true
+    }
+  ],
+  "indexes": [
+    {
+      "definition": "CREATE UNIQUE INDEX advisors_pkey ON public.advisors USING btree (advisor_id)",
+      "index_name": "advisors_pkey",
+      "table_name": "advisors"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX advisors_user_id_key ON public.advisors USING btree (user_id)",
+      "index_name": "advisors_user_id_key",
+      "table_name": "advisors"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX alembic_version_pkc ON public.alembic_version USING btree (version_num)",
+      "index_name": "alembic_version_pkc",
+      "table_name": "alembic_version"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX companies_pkey ON public.companies USING btree (company_id)",
+      "index_name": "companies_pkey",
+      "table_name": "companies"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id)",
+      "index_name": "documents_pkey",
+      "table_name": "documents"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uq_documents_one_resume_per_student ON public.documents USING btree (student_id) WHERE (lower((document_type)::text) = 'resume'::text)",
+      "index_name": "uq_documents_one_resume_per_student",
+      "table_name": "documents"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX internships_pkey ON public.internships USING btree (internship_id)",
+      "index_name": "internships_pkey",
+      "table_name": "internships"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uq_internships_application_id ON public.internships USING btree (application_id)",
+      "index_name": "uq_internships_application_id",
+      "table_name": "internships"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uq_internships_student_id ON public.internships USING btree (student_id)",
+      "index_name": "uq_internships_student_id",
+      "table_name": "internships"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX mentors_pkey ON public.mentors USING btree (mentor_id)",
+      "index_name": "mentors_pkey",
+      "table_name": "mentors"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX mentors_user_id_key ON public.mentors USING btree (user_id)",
+      "index_name": "mentors_user_id_key",
+      "table_name": "mentors"
+    },
+    {
+      "definition": "CREATE INDEX ix_otp_codes_email ON public.otp_codes USING btree (email)",
+      "index_name": "ix_otp_codes_email",
+      "table_name": "otp_codes"
+    },
+    {
+      "definition": "CREATE INDEX ix_otp_codes_id ON public.otp_codes USING btree (id)",
+      "index_name": "ix_otp_codes_id",
+      "table_name": "otp_codes"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX otp_codes_pkey ON public.otp_codes USING btree (id)",
+      "index_name": "otp_codes_pkey",
+      "table_name": "otp_codes"
+    },
+    {
+      "definition": "CREATE INDEX ix_positions_company_id ON public.positions USING btree (company_id)",
+      "index_name": "ix_positions_company_id",
+      "table_name": "positions"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX positions_pkey ON public.positions USING btree (position_id)",
+      "index_name": "positions_pkey",
+      "table_name": "positions"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX staffs_pkey ON public.staffs USING btree (staff_id)",
+      "index_name": "staffs_pkey",
+      "table_name": "staffs"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX staffs_user_id_key ON public.staffs USING btree (user_id)",
+      "index_name": "staffs_user_id_key",
+      "table_name": "staffs"
+    },
+    {
+      "definition": "CREATE INDEX ix_student_applications_position_id ON public.student_applications USING btree (position_id)",
+      "index_name": "ix_student_applications_position_id",
+      "table_name": "student_applications"
+    },
+    {
+      "definition": "CREATE INDEX ix_student_applications_status ON public.student_applications USING btree (status)",
+      "index_name": "ix_student_applications_status",
+      "table_name": "student_applications"
+    },
+    {
+      "definition": "CREATE INDEX ix_student_applications_student_id ON public.student_applications USING btree (student_id)",
+      "index_name": "ix_student_applications_student_id",
+      "table_name": "student_applications"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX student_applications_pkey ON public.student_applications USING btree (application_id)",
+      "index_name": "student_applications_pkey",
+      "table_name": "student_applications"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uq_student_applications_identity ON public.student_applications USING btree (application_id, student_id, position_id)",
+      "index_name": "uq_student_applications_identity",
+      "table_name": "student_applications"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX uq_student_applications_one_active_per_student ON public.student_applications USING btree (student_id) WHERE ((status)::text = ANY ((ARRAY['applied'::character varying, 'interview_scheduled'::character varying, 'waiting_result'::character varying])::text[]))",
+      "index_name": "uq_student_applications_one_active_per_student",
+      "table_name": "student_applications"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX ix_students_email ON public.students USING btree (email)",
+      "index_name": "ix_students_email",
+      "table_name": "students"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX students_pkey ON public.students USING btree (id)",
+      "index_name": "students_pkey",
+      "table_name": "students"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX students_student_id_key ON public.students USING btree (student_id)",
+      "index_name": "students_student_id_key",
+      "table_name": "students"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX students_user_id_key ON public.students USING btree (user_id)",
+      "index_name": "students_user_id_key",
+      "table_name": "students"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX ix_teachers_email ON public.teachers USING btree (email)",
+      "index_name": "ix_teachers_email",
+      "table_name": "teachers"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX teachers_pkey ON public.teachers USING btree (id)",
+      "index_name": "teachers_pkey",
+      "table_name": "teachers"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX ix_users_email ON public.users USING btree (email)",
+      "index_name": "ix_users_email",
+      "table_name": "users"
+    },
+    {
+      "definition": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (user_id)",
+      "index_name": "users_pkey",
+      "table_name": "users"
+    }
+  ],
+  "policies": [],
+  "row_counts": {
+    "advisors": 1,
+    "alembic_version": 1,
+    "companies": 1,
+    "documents": 5,
+    "internships": 1,
+    "mentors": 1,
+    "otp_codes": 0,
+    "positions": 2,
+    "staffs": 2,
+    "student_applications": 1,
+    "students": 2,
+    "teachers": 0,
+    "users": 3
+  },
+  "sequences": [
+    {
+      "cycle": false,
+      "data_type": "integer",
+      "increment_by": 1,
+      "max_value": 2147483647,
+      "min_value": 1,
+      "schemaname": "public",
+      "sequencename": "documents_id_seq",
+      "start_value": 1
+    },
+    {
+      "cycle": false,
+      "data_type": "integer",
+      "increment_by": 1,
+      "max_value": 2147483647,
+      "min_value": 1,
+      "schemaname": "public",
+      "sequencename": "otp_codes_id_seq",
+      "start_value": 1
+    },
+    {
+      "cycle": false,
+      "data_type": "integer",
+      "increment_by": 1,
+      "max_value": 2147483647,
+      "min_value": 1,
+      "schemaname": "public",
+      "sequencename": "students_id_seq",
+      "start_value": 1
+    },
+    {
+      "cycle": false,
+      "data_type": "integer",
+      "increment_by": 1,
+      "max_value": 2147483647,
+      "min_value": 1,
+      "schemaname": "public",
+      "sequencename": "teachers_id_seq",
+      "start_value": 1
+    }
+  ],
+  "tables": [
+    "documents",
+    "alembic_version",
+    "otp_codes",
+    "companies",
+    "users",
+    "mentors",
+    "teachers",
+    "advisors",
+    "staffs",
+    "students",
+    "positions",
+    "student_applications",
+    "internships"
+  ],
+  "utc": "20261017T143232Z"
+}

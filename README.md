@@ -1,12 +1,55 @@
-# Project Scope
-
-## CIS CWIE Hub
+# CIS CWIE Hub
 
 CIS CWIE Hub is a web application for managing the Cooperative and Work-Integrated Education (CWIE) process of the Department of Computer and Information Science.
 
 The system supports the entire CWIE workflow, including company management, student-company matching, document management, supervision, examination management, evaluation, and reporting.
 
 ---
+
+## Quick Start
+
+### Prerequisites
+- Node.js (v18+) for frontend
+- Python (v3.9+) for backend  
+- Redis for OTP storage
+- PostgreSQL/Supabase for database
+
+### Installation & Running
+
+**See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for detailed setup instructions.**
+
+**Quick:**
+```bash
+# Terminal 1: Backend
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# Terminal 2: Frontend
+cd frontend
+npm install
+npm run dev
+
+# Terminal 3: Redis (if local)
+redis-server
+```
+
+Then visit: **http://localhost:3000**
+
+### Automated Startup (Windows)
+```powershell
+.\run-dev.ps1
+```
+
+### Automated Startup (macOS/Linux)
+```bash
+chmod +x run-dev.sh
+./run-dev.sh
+```
+
+---
+
+# Project Scope
 
 # 1. User Scope
 

@@ -1,14 +1,8 @@
-from sqlalchemy import (
-    Column,
-    DateTime,
-    Integer,
-    String,
-    Float,
-    Boolean,
-    ForeignKey,
-    func
-)
+# models/student.py
 
+import uuid
+from sqlalchemy import Column, ForeignKey, String, Boolean
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -16,13 +10,7 @@ from app.database import Base
 
 
 class Student(Base):
-
-    __tablename__ = "students"
-
-    id = Column(
-        Integer,
-        primary_key=True
-    )
+    __tablename__ = "student"
 
     # เชื่อมกับบัญชีกลาง
     user_id = Column(
@@ -33,10 +21,12 @@ class Student(Base):
     )
 
     student_id = Column(
-        String,
-        unique=True
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
     )
 
+<<<<<<< HEAD
     # เก็บชั่วคราวจนกว่า Auth ใหม่จะเสร็จ
     email = Column(
         String(255),
@@ -52,27 +42,53 @@ class Student(Base):
 
     first_name = Column(
         String(100),
+=======
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.user_id"),
+        unique=True,
         nullable=False
     )
 
-    last_name = Column(
-        String(100),
+    student_code = Column(String(20), unique=True)
+
+    name = Column(String(100))
+
+    email = Column(
+        String(255),
+        unique=True,
+>>>>>>> origin/su
         nullable=False
     )
 
+    is_active = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
+
+<<<<<<< HEAD
     major = Column(String)
     year = Column(Integer)
     gpax = Column(Float)
 
+=======
+>>>>>>> origin/su
     company_id = Column(
         UUID(as_uuid=True),
         ForeignKey("companies.company_id"),
         nullable=True
+    ) 
+
+    user = relationship(
+        "User",
+        backref="student"
     )
 
     company = relationship(
         "Company",
         back_populates="students"
+<<<<<<< HEAD
     )
 
     documents = relationship(
@@ -99,4 +115,6 @@ class Student(Base):
     updated_at = Column(
         DateTime(timezone=True),
         onupdate=func.now()
+=======
+>>>>>>> origin/su
     )

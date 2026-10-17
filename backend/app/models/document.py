@@ -2,13 +2,21 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
+<<<<<<< HEAD
     Text,
     DateTime,
     ForeignKey,
     Index,
     text
+=======
+    ForeignKey,
+    UUID as SQLAlchemy_UUID,
+    DateTime,
+    Text
+>>>>>>> origin/su
 )
-
+from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -32,30 +40,30 @@ class Document(Base):
     )
 
     student_id = Column(
-        Integer,
-        ForeignKey("students.id"),
+        UUID(as_uuid=True),
+        ForeignKey("student.student_id"),
         nullable=False
     )
 
     # เจ้าของเอกสาร
     student = relationship(
         "Student",
-        back_populates="documents"
+        backref="documents"
     )
 
     document_type = Column(
-        String
+        String(100),
+        nullable=False
     )
 
-    file_url = Column(
-        String
-    )
+    file_url = Column(String)
 
     status = Column(
-        String,
+        String(50),
         default="pending"
     )
 
+<<<<<<< HEAD
     comments = Column(
         Text,
         nullable=True
@@ -64,9 +72,22 @@ class Document(Base):
     uploaded_at = Column(
         DateTime,
         nullable=True
+=======
+    comments = Column(Text)
+
+    uploaded_at = Column(
+        DateTime,
+        default=datetime.utcnow
+>>>>>>> origin/su
     )
 
     updated_at = Column(
         DateTime,
+<<<<<<< HEAD
         nullable=True
     )
+=======
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+>>>>>>> origin/su

@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+<<<<<<< HEAD
+=======
+from app.core.redis import connect_redis, disconnect_redis
+>>>>>>> origin/su
 
 from app import models
 from app.routers import (
@@ -19,10 +23,13 @@ from app.routers import mentor
 from app.routers import staff
 
 
+<<<<<<< HEAD
 
 from app.routers.email_test import router as email_test_router
 
 
+=======
+>>>>>>> origin/su
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION
@@ -39,23 +46,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.on_event("startup")
+async def startup():
+    await connect_redis()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await disconnect_redis()
+
+
 @app.get("/")
 def root():
-
     return {
-        "message":"CIS CWIE Hub",
-        "version":settings.APP_VERSION
+        "message": "CIS CWIE Hub",
+        "version": settings.APP_VERSION
     }
-    
+
+
 @app.get("/health")
-
 def health_check():
-
     return {
-
-        "status":"running"
-
+        "status": "running"
     }
+
 
 app.include_router(
     auth.router
