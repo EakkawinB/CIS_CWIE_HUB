@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.database import get_db
 from app.models.student import Student
@@ -17,7 +18,7 @@ router = APIRouter(
 )
 
 
-def _lookup_role(email: str, db: Session) -> tuple[str, int] | None:
+def _lookup_role(email: str, db: Session) -> Optional[tuple[str, str]]:
     """
     หา role และ profile_id จาก email
     return (role, profile_id) หรือ None ถ้าไม่เจอ
@@ -27,21 +28,21 @@ def _lookup_role(email: str, db: Session) -> tuple[str, int] | None:
         Student.is_active == True
     ).first()
     if student:
-        return "student", student.id
+        return "student", str(student.student_id)
 
     teacher = db.query(Teacher).filter(
         Teacher.email == email,
         Teacher.is_active == True
     ).first()
     if teacher:
-        return "teacher", teacher.id
+        return "teacher", str(teacher.teacher_id)
 
     staff = db.query(Staff).filter(
         Staff.email == email,
         Staff.is_active == True
     ).first()
     if staff:
-        return "staff", staff.staff_id
+        return "staff", str(staff.staff_id)
 
     return None
 

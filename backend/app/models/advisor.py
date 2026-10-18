@@ -6,10 +6,10 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class Admin(Base):
-    __tablename__ = "admin"
+class Advisor(Base):
+    __tablename__ = "advisors"
 
-    admin_id = Column(
+    advisor_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4
@@ -18,8 +18,8 @@ class Admin(Base):
     user_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.user_id"),
-        unique=True,
-        nullable=False
+        nullable=False,
+        unique=True
     )
 
     name = Column(String(100))
@@ -30,6 +30,8 @@ class Admin(Base):
         nullable=False
     )
 
+    department = Column(String(100))
+
     is_active = Column(
         Boolean,
         default=True,
@@ -38,5 +40,10 @@ class Admin(Base):
 
     user = relationship(
         "User",
-        backref="admin"
+        backref="advisor"
+    )
+
+    advisor_student_assignments = relationship(
+        "AdvisorStudentAssignment",
+        back_populates="advisor"
     )

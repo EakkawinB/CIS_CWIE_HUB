@@ -20,6 +20,7 @@ import { getTranslation } from '@/lib/translations'
 import { authApi } from '@/lib/api'
 import { translateError, getLoadingMessage, getSuccessMessage } from '@/lib/error-translator'
 import { AuthLoadingModal } from './auth-loading-modal'
+import { OTPVerificationModal } from './otp-verification'
 
 export function LoginCard() {
   const [sent, setSent] = useState(false)
@@ -32,6 +33,8 @@ export function LoginCard() {
   const [success, setSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [resendCountdown, setResendCountdown] = useState(0)
+  const [isOTPModalOpen, setIsOTPModalOpen] = useState(false)
+  const [otpModalEmail, setOtpModalEmail] = useState('')
   const countdownInterval = useRef<NodeJS.Timeout | null>(null)
   const { language } = useLanguage()
   const t = getTranslation(language)
@@ -73,8 +76,8 @@ export function LoginCard() {
 
     try {
       await authApi.requestOtp(email)
-      setSent(true)
-      setResendCountdown(60)
+      setOtpModalEmail(email)
+      setIsOTPModalOpen(true)
       setSuccess(true)
       setSuccessMessage(getSuccessMessage('otpSent', language))
       setTimeout(() => setSuccess(false), 3000)
@@ -117,6 +120,38 @@ export function LoginCard() {
       setAuthLoading(false)
       setAuthLoadingMessage('')
     }
+  }
+
+  const handleOTPModalVerifySuccess = async (data: any) => {
+    // Redirect to dashboard after successful verification
+    setAuthLoading(true)
+    setAuthLoadingMessage(getLoadingMessage('verifyOtp', language))
+
+    try {
+      setSuccess(true)
+      setSuccessMessage(getSuccessMessage('otpVerified', language))
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 1500)
+    } catch (err) {
+      const errorMessage = translateError(err, language)
+      setError(errorMessage)
+    } finally {
+      setAuthLoading(false)
+      setAuthLoadingMessage('')
+    }
+  }
+
+  const handleCloseOTPModal = () => {
+    setIsOTPModalOpen(false)
+    setOtpModalEmail('')
+  }
+
+  const handleBackToLogin = () => {
+    setIsOTPModalOpen(false)
+    setOtpModalEmail('')
+    setEmail('')
+    setError(null)
   }
 
   const handleResendOTP = async () => {
@@ -187,6 +222,13 @@ export function LoginCard() {
   return (
     <>
       <AuthLoadingModal isOpen={authLoading} message={authLoadingMessage} />
+      <OTPVerificationModal
+        isOpen={isOTPModalOpen}
+        email={otpModalEmail}
+        onClose={handleCloseOTPModal}
+        onVerifySuccess={handleOTPModalVerifySuccess}
+        onBackToLogin={handleBackToLogin}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20, filter: 'blur(6px)' }}
@@ -248,115 +290,45 @@ export function LoginCard() {
 
         {/* Form */}
         <div className="mt-8">
-          <AnimatePresence mode="wait">
-            {!sent ? (
-              <motion.form
-                key="email"
-                exit={{ opacity: 0, x: -10 }}
-                onSubmit={handleSendOTP}
-              >
-                <label className="flex flex-col gap-2 text-sm font-semibold">
-                  {t.login.universityEmail}
-                  <div className="relative">
-                    <Mail className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      required
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t.login.emailPlaceholder}
-                      className="h-12 w-full rounded-xl border border-input bg-background pr-4 pl-11 font-normal outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-                      disabled={authLoading}
-                    />
-                  </div>
-                </label>
-                <button
-                  type="submit"
-                  disabled={authLoading}
-                  className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
-                >
-                  {authLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      {t.login.connecting}
-                    </>
-                  ) : (
-                    <>
-                      {t.login.sendOTP}
-                      <ArrowRight className="size-4" />
-                    </>
-                  )}
-                </button>
-              </motion.form>
-            ) : (
-              <motion.form
-                key="otp"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                onSubmit={handleVerifyOTP}
-              >
-                <p className="mb-4 rounded-xl bg-surface p-3 text-sm text-muted-foreground">
-                  {t.login.otpSent}{' '}
-                  <strong className="text-foreground">{email}</strong>.
-                </p>
-
-                <label className="flex flex-col gap-2 text-sm font-semibold">
-                  {t.login.oneTimePassword}
-                  <input
-                    required
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    placeholder={t.login.otpPlaceholder}
-                    className="h-12 rounded-xl border border-input bg-background px-4 text-center font-mono text-xl tracking-[.4em] outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-                    disabled={authLoading}
-                  />
-                </label>
-
-                <button
-                  type="submit"
-                  disabled={authLoading || otp.length !== 6}
-                  className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
-                >
-                  {authLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      {t.login.connecting}
-                    </>
-                  ) : (
-                    <>
-                      {t.login.verifySignIn}
-                      <ShieldCheck className="size-4" />
-                    </>
-                  )}
-                </button>
-
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBackToEmail}
-                    className="flex-1 text-center text-xs font-medium text-muted-foreground hover:text-primary"
-                  >
-                    {t.login.differentEmail}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleResendOTP}
-                    disabled={resendCountdown > 0 || authLoading}
-                    className="flex-1 text-center text-xs font-medium text-muted-foreground hover:text-primary disabled:opacity-50"
-                  >
-                    {resendCountdown > 0
-                      ? `${language === 'th' ? 'ส่งใหม่' : 'Resend'} (${resendCountdown}s)`
-                      : language === 'th'
-                        ? 'ส่งใหม่'
-                        : 'Resend OTP'}
-                  </button>
-                </div>
-              </motion.form>
-            )}
-          </AnimatePresence>
+          <motion.form
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            onSubmit={handleSendOTP}
+          >
+            <label className="flex flex-col gap-2 text-sm font-semibold">
+              {t.login.universityEmail}
+              <div className="relative">
+                <Mail className="absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t.login.emailPlaceholder}
+                  className="h-12 w-full rounded-xl border border-input bg-background pr-4 pl-11 font-normal outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                  disabled={authLoading || isOTPModalOpen}
+                />
+              </div>
+            </label>
+            <button
+              type="submit"
+              disabled={authLoading || isOTPModalOpen}
+              className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+            >
+              {authLoading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  {t.login.connecting}
+                </>
+              ) : (
+                <>
+                  {t.login.sendOTP}
+                  <ArrowRight className="size-4" />
+                </>
+              )}
+            </button>
+          </motion.form>
         </div>
 
         {/* Divider */}

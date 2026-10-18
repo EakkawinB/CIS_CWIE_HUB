@@ -55,3 +55,8 @@ class Student(Base):
         "Company",
         back_populates="students"
     )
+
+    advisor_assignments = relationship(
+        "AdvisorStudentAssignment",
+        back_populates="student"
+    )

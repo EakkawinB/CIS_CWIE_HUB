@@ -1,7 +1,7 @@
 """update cw ie schema
 
 Revision ID: 31837ced408a
-Revises: bbeb525eda57
+Revises: 
 Create Date: 2026-07-30 12:26:09.654619
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '31837ced408a'
-down_revision: Union[str, Sequence[str], None] = 'bbeb525eda57'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
