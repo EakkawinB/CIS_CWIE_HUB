@@ -1,80 +1,15 @@
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environment
+*.pyc
 venv/
-ENV/
-env/
-.venv
-
-# Environment variables
 .env
-.env.local
-.env.*.local
 
-# PyCharm
-.idea/
+# Node
+node_modules/
 
-# VS Code
-.vscode/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pytest / Coverage
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.hypothesis/
-
-# Database
+# Database / Alembic local
 *.db
-*.sqlite
 *.sqlite3
 
-# Alembic (migrations)
-alembic/versions/*.pyc
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-tmp/
-temp/
-
-# Backup files
-*.bak
-*.swp
-*.swo
-*~
-
-run_backend.ps1
+# IDEs
+.vscode/

@@ -1,116 +1,24 @@
-# ============================
-# Frontend .gitignore
-# ============================
-
-# ============================
-# v0 / AI Generated Files
-# ============================
-__v0_runtime_loader.js
-__v0_devtools.tsx
-__v0_jsx-dev-runtime.ts
-.snowflake/
-.v0-trash/
-
-# ============================
-# Vercel
-# ============================
-.vercel/
-
-# ============================
-# Environment Variables
-# ============================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.*.local
-
-# ============================
-# Dependencies
-# ============================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-yarn.lock
-package-lock.json
-pnpm-lock.yaml
-
-# ============================
-# Next.js
-# ============================
-.next/
-out/
-*.tsbuildinfo
-next-env.d.ts
-.turbo/
-
-# ============================
-# Build
-# ============================
-dist/
-build/
-*.map
-
-# ============================
-# Testing
-# ============================
-coverage/
-.nyc_output/
-coverage.json
-
-# ============================
-# Cache
-# ============================
-.cache/
-.eslintcache
-.stylelintcache
-
-# ============================
-# IDE
-# ============================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-*.iml
-
-# ============================
-# OS
-# ============================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# ============================
 # Logs
-# ============================
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
-# ============================
-# TypeScript
-# ============================
-*.tsbuildinfo
+node_modules
+dist
+dist-ssr
+*.local
 
-# ============================
-# Temporary Files
-# ============================
-*.tmp
-*.temp
-tmp/
-temp/
-
-# ============================
-# Storybook (if used)
-# ============================
-.storybook/
-storybook-static/
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

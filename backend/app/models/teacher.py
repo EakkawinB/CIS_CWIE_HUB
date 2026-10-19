@@ -1,46 +1,64 @@
-# models/teacher.py
-
-import uuid
-from sqlalchemy import Column, ForeignKey, String, Boolean
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Integer,
+    String,
+    Boolean,
+    func
+)
 
 from app.database import Base
 
 
 class Teacher(Base):
-    __tablename__ = "teacher"
 
-    teacher_id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
+    __tablename__ = "teachers"
+
+    id = Column(
+        Integer,
+        primary_key=True
     )
 
-    user_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("users.user_id"),
-        nullable=False,
-        unique=True
-    )
-
-    name = Column(String(100))
-
+    # ข้อมูล Login
     email = Column(
         String(255),
         unique=True,
+        nullable=False,
+        index=True
+    )
+
+    # ข้อมูลส่วนตัว
+    first_name = Column(
+        String(100),
         nullable=False
     )
 
-    position = Column(String(100))
+    last_name = Column(
+        String(100),
+        nullable=False
+    )
 
+    teacher_code = Column(
+        String
+    )
+
+    department = Column(
+        String,
+        default="Computer and Information Science"
+    )
+
+    # สถานะบัญชี
     is_active = Column(
         Boolean,
-        default=True,
-        nullable=False
+        default=True
     )
 
-    user = relationship(
-        "User",
-        backref="teacher"
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now()
     )

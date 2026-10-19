@@ -1,98 +1,10 @@
-<<<<<<< HEAD
 # Local AI / Codex context files
 AGENTS.md
 PROJECT_CONTEXT.md
 MIGRATION_CHECKLIST.md
-=======
-# ============================
-# Root Project .gitignore
-# ============================
+CIS_CWIE_Hub_Database_Handoff.md
+ai_studio_reference/
 
-# ============================
-# Documentation (Generated)
-# ============================
-*.md
-!README.md
-SETUP_GUIDE.md
-IMPLEMENTATION_SUMMARY.md
-MODELS_FIX_SUMMARY.md
-MODELS_VERIFICATION_CHECKLIST.md
-BILINGUAL_ERRORS.md
-BILINGUAL_UPDATE_SUMMARY.md
-COMPLETED_FEATURES.md
-
-# ============================
-# Scripts (Local Development)
-# ============================
-run-dev.ps1
-run-dev.sh
-git-workflow.ps1
-
-# ============================
-# Python
-# ============================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-ENV/
-env/
-
-# ============================
-# Node (if any at root)
-# ============================
-node_modules/
-
-# ============================
-# Environment variables
-# ============================
-.env
-.env.local
-.env.*.local
-
-# ============================
-# IDE
-# ============================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ============================
-# OS
-# ============================
-.DS_Store
-Thumbs.db
-
-# ============================
-# Database
-# ============================
-*.db
-*.sqlite
-*.sqlite3
-
-# ============================
-# Logs
-# ============================
-*.log
-logs/
-
-# ============================
-# Temporary files
-# ============================
-*.tmp
-*.temp
-tmp/
-temp/
-
-# ============================
-# Build artifacts (from sub-projects)
-# ============================
-dist/
-build/
-.next/
-out/
->>>>>>> origin/su
+# Local recovery / test artifacts
+backend/schema_backups/
+backend/oversize-test.pdf
