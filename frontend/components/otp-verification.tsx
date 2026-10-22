@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { X, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { authApi } from '@/lib/api'
+import { useLanguage } from '@/lib/language-context'
+import { getTranslation } from '@/lib/translations'
 
 interface OTPVerificationModalProps {
   isOpen: boolean
@@ -20,6 +22,10 @@ export function OTPVerificationModal({
   onVerifySuccess,
   onBackToLogin,
 }: OTPVerificationModalProps) {
+  const { language } = useLanguage()
+  const t = getTranslation(language)
+  const tModal = t.otpModal
+
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timeLeft, setTimeLeft] = useState(30)
   const [isResendActive, setIsResendActive] = useState(false)
@@ -183,7 +189,7 @@ export function OTPVerificationModal({
       const code = otp.join('')
       await authApi.verifyOtp(email, code)
 
-      setSuccessMessage('Email verified successfully!')
+      setSuccessMessage(tModal.emailVerified)
       setTimeout(() => {
         onVerifySuccess?.({
           email,
@@ -217,7 +223,7 @@ export function OTPVerificationModal({
       setOtp(['', '', '', '', '', ''])
       setTimeLeft(30)
       setIsResendActive(false)
-      setSuccessMessage('New code sent to your email')
+      setSuccessMessage(tModal.newCodeSent)
       inputRefs.current[0]?.focus()
 
       // Re-enable resend after a short delay
@@ -283,7 +289,7 @@ export function OTPVerificationModal({
                   onClick={handleCloseModal}
                   disabled={isVerifying || isResending}
                   className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Close"
+                  aria-label={tModal.close}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -294,10 +300,10 @@ export function OTPVerificationModal({
                 {/* Header */}
                 <div className="mb-8">
                   <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-                    Verify Your Email
+                    {tModal.title}
                   </h2>
                   <p className="text-sm md:text-base text-muted-foreground">
-                    We've sent a 6-digit verification code to your email.
+                    {tModal.description}
                   </p>
                 </div>
 
@@ -307,7 +313,7 @@ export function OTPVerificationModal({
                   <button
                     onClick={() => setMaskEmail(!maskEmail)}
                     className="p-1 hover:bg-muted rounded transition-colors"
-                    aria-label={maskEmail ? 'Show email' : 'Hide email'}
+                    aria-label={maskEmail ? tModal.showEmail : tModal.hideEmail}
                   >
                     {maskEmail ? (
                       <Eye className="w-4 h-4 text-muted-foreground" />
@@ -350,7 +356,7 @@ export function OTPVerificationModal({
                 {/* OTP Input Fields */}
                 <div className="mb-8">
                   <label className="block text-sm font-semibold text-foreground mb-4">
-                    Enter verification code
+                    {tModal.enterCode}
                   </label>
                   <div className="flex gap-2 md:gap-3 justify-center">
                     {otp.map((digit, index) => (
@@ -383,10 +389,10 @@ export function OTPVerificationModal({
                   {isVerifying ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Verifying...
+                      {tModal.verifying}
                     </>
                   ) : (
-                    'Verify'
+                    tModal.verify
                   )}
                 </button>
 
@@ -398,13 +404,13 @@ export function OTPVerificationModal({
                       disabled={isResending || isResendDisabledByRequest || isVerifying}
                       className="text-primary hover:text-primary/80 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isResending ? 'Sending...' : 'Resend code'}
+                      {isResending ? tModal.sending : tModal.resendCode}
                     </button>
                   ) : (
                     <p className="text-muted-foreground">
-                      Didn't get it?{' '}
+                      {tModal.didntGet}{' '}
                       <span className="text-foreground font-semibold">
-                        Resend in {formatTime(timeLeft)}
+                        {tModal.resendIn} {formatTime(timeLeft)}
                       </span>
                     </p>
                   )}
@@ -416,7 +422,7 @@ export function OTPVerificationModal({
                   disabled={isVerifying || isResending}
                   className="w-full h-11 rounded-xl border-2 border-border bg-background text-sm md:text-base font-semibold text-foreground transition-all duration-200 hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Back to Login
+                  {tModal.backToLogin}
                 </button>
               </div>
             </div>

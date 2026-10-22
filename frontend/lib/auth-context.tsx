@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData: AuthUser = {
         email,
         role: response.role as AuthUser['role'],
-        profile_id: response.profile_id,
+        profile_id: response.profile_id ?? 0,
       }
 
       // Generate a simple token (in production, this should come from backend)

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import type { Language } from './translations'
+import i18n from './i18n'
 
 interface LanguageContextType {
   language: Language
@@ -16,15 +17,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true)
-    const saved = localStorage.getItem('language') as Language | null
-    if (saved && (saved === 'en' || saved === 'th')) {
-      setLanguageState(saved)
-      document.documentElement.lang = saved
-    }
+    // Load language from i18n after initialization
+    const currentLang = (i18n.language || 'en') as Language
+    setLanguageState(currentLang)
   }, [])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
+    i18n.changeLanguage(lang)
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', lang)
       document.documentElement.lang = lang
@@ -41,7 +41,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext)
-  
+
   // Return default value if context is not available (during SSR/initial render)
   if (!context) {
     return {
@@ -49,6 +49,6 @@ export function useLanguage() {
       setLanguage: () => {},
     }
   }
-  
+
   return context
 }

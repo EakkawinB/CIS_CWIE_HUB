@@ -219,6 +219,25 @@ export const translations = {
       },
     },
 
+    // OTP Verification Modal
+    otpModal: {
+      title: 'Verify Your Email',
+      description: 'We\'ve sent a 6-digit verification code to your email.',
+      enterCode: 'Enter verification code',
+      verify: 'Verify',
+      verifying: 'Verifying...',
+      didntGet: 'Didn\'t get it?',
+      resendIn: 'Resend in',
+      resendCode: 'Resend code',
+      backToLogin: 'Back to Login',
+      sending: 'Sending...',
+      emailVerified: 'Email verified successfully!',
+      newCodeSent: 'New code sent to your email',
+      close: 'Close',
+      showEmail: 'Show email',
+      hideEmail: 'Hide email',
+    },
+
     // Site Header
     siteHeader: {
       cooperative: 'Cooperative Education',
@@ -514,6 +533,25 @@ export const translations = {
         loginSuccess: 'เข้าสู่ระบบสำเร็จแล้ว!',
         operationSuccess: 'ดำเนินการสำเร็จแล้ว!',
       },
+    },
+
+    // OTP Verification Modal
+    otpModal: {
+      title: 'ตรวจสอบอีเมลของคุณ',
+      description: 'เราส่งรหัสยืนยัน 6 หลักไปยังอีเมลของคุณแล้ว',
+      enterCode: 'ป้อนรหัสยืนยัน',
+      verify: 'ตรวจสอบ',
+      verifying: 'กำลังตรวจสอบ...',
+      didntGet: 'ไม่ได้รับหรือ',
+      resendIn: 'ส่งอีกครั้งใน',
+      resendCode: 'ส่งรหัสอีกครั้ง',
+      backToLogin: 'กลับไปสู่การเข้าสู่ระบบ',
+      sending: 'กำลังส่ง...',
+      emailVerified: 'ตรวจสอบอีเมลสำเร็จแล้ว!',
+      newCodeSent: 'ส่งรหัสใหม่ไปยังอีเมลของคุณ',
+      close: 'ปิด',
+      showEmail: 'แสดงอีเมล',
+      hideEmail: 'ซ่อนอีเมล',
     },
 
     // Site Header

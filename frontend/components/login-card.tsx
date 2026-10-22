@@ -17,10 +17,77 @@ import {
 import Link from 'next/link'
 import { useLanguage } from '@/lib/language-context'
 import { getTranslation } from '@/lib/translations'
-import { authApi } from '@/lib/api'
-import { translateError, getLoadingMessage, getSuccessMessage } from '@/lib/error-translator'
+import { authApi, ApiError } from '@/lib/api'
 import { AuthLoadingModal } from './auth-loading-modal'
 import { OTPVerificationModal } from './otp-verification'
+
+// Inline helper functions for error translation and messages
+const translateError = (error: unknown, language: 'en' | 'th'): string => {
+  const t = getTranslation(language)
+
+  if (error instanceof ApiError) {
+    if (error.message.startsWith('login.errors.')) {
+      const keys = error.message.split('.')
+      try {
+        let value: any = t
+        for (const key of keys) {
+          value = value[key]
+        }
+        return typeof value === 'string' ? value : error.message
+      } catch {
+        return error.detail || error.message || t.login.errors.unknownError
+      }
+    }
+    return error.detail || error.message
+  }
+
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return t.login.errors.unknownError
+}
+
+const getLoadingMessage = (
+  action: 'sendOtp' | 'verifyOtp' | 'googleLogin' | 'ssoLogin',
+  language: 'en' | 'th'
+): string => {
+  const messages = {
+    en: {
+      sendOtp: 'Sending OTP...',
+      verifyOtp: 'Verifying OTP...',
+      googleLogin: 'Signing in with Google...',
+      ssoLogin: 'Connecting to ICIT SSO...',
+    },
+    th: {
+      sendOtp: 'กำลังส่ง OTP...',
+      verifyOtp: 'กำลังตรวจสอบ OTP...',
+      googleLogin: 'กำลังเข้าสู่ระบบด้วย Google...',
+      ssoLogin: 'กำลังเชื่อมต่อกับ ICIT SSO...',
+    },
+  }
+  return messages[language][action] || messages.en[action]
+}
+
+const getSuccessMessage = (
+  action: 'otpSent' | 'otpVerified' | 'loginSuccess',
+  language: 'en' | 'th'
+): string => {
+  const t = getTranslation(language)
+  const messages = {
+    en: {
+      otpSent: 'OTP sent successfully! Check your email.',
+      otpVerified: 'OTP verified successfully!',
+      loginSuccess: 'Sign in successful!',
+    },
+    th: {
+      otpSent: 'ส่ง OTP สำเร็จแล้ว! ตรวจสอบอีเมลของคุณ',
+      otpVerified: 'ตรวจสอบ OTP สำเร็จแล้ว!',
+      loginSuccess: 'เข้าสู่ระบบสำเร็จแล้ว!',
+    },
+  }
+  return messages[language][action] || messages.en[action]
+}
 
 export function LoginCard() {
   const [sent, setSent] = useState(false)

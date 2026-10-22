@@ -155,10 +155,12 @@ export function Workflow() {
   const { language } = useLanguage()
   const t = getTranslation(language)
 
-  const steps = t.workflow.steps.map((step, index) => [
-    step,
-      [UserRound, FileUp, Handshake, FileCheck2, Building2, BriefcaseBusiness, LineChart, ClipboardCheck, Flag][index],
-    ]) as const
+  const iconComponents = [UserRound, FileUp, Handshake, FileCheck2, Building2, BriefcaseBusiness, LineChart, ClipboardCheck, Flag]
+
+  const steps = t.workflow.steps.map((step, index) => ({
+    label: step,
+    icon: iconComponents[index],
+  }))
 
   return (
     <section id="workflow" className="py-24">
@@ -172,17 +174,17 @@ export function Workflow() {
         <div className="relative mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="absolute top-7 right-10 left-10 hidden h-px bg-border lg:block" />
 
-          {steps.map(([s, I], i) => (
-            <Reveal key={s} delay={i * 0.04}>
+          {steps.map(({label, icon: Icon}, i) => (
+            <Reveal key={label} delay={i * 0.04}>
               <div className="relative flex items-center gap-4 rounded-xl border border-border bg-background p-4">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <I className="size-4" />
+                  <Icon className="size-4" />
                 </span>
                 <div>
                   <span className="text-xs font-bold text-secondary">
                     STEP {String(i + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="text-sm font-semibold">{s}</h3>
+                  <h3 className="text-sm font-semibold">{label}</h3>
                 </div>
               </div>
             </Reveal>
