@@ -9,7 +9,7 @@ from app.database import Base
 
 
 class Staff(Base):
-    __tablename__ = "staff"
+    __tablename__ = "staffs"
 
     staff_id = Column(
         UUID(as_uuid=True),

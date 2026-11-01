@@ -19,10 +19,10 @@ class Settings(BaseSettings):
 
     REDIS_URL: str = "redis://localhost:6379"
 
-    EMAIL_HOST: str | None = None
-    EMAIL_PORT: int | None = None
-    EMAIL_ADDRESS: str | None = None
-    EMAIL_PASSWORD: str | None = None
+    RESEND_API_KEY: str | None = None
+    RESEND_FROM_EMAIL: str | None = None
+
+    FRONTEND_URL: str | None = None
 
 
     class Config:

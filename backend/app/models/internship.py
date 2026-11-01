@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, date
-from sqlalchemy import Column, ForeignKey, String, Date, Text, DateTime
+from sqlalchemy import Column, Date, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -25,13 +25,26 @@ class Internship(Base):
     company_id = Column(
         UUID(as_uuid=True),
         ForeignKey("companies.company_id"),
-        nullable=False
+        nullable=True
     )
 
     mentor_id = Column(
         UUID(as_uuid=True),
         ForeignKey("mentor.mentor_id"),
         nullable=True
+    )
+
+    application_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("student_applications.application_id"),
+        nullable=True,
+        unique=True,
+    )
+
+    position_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("positions.position_id"),
+        nullable=True,
     )
 
     position = Column(String(100))
@@ -46,6 +59,13 @@ class Internship(Base):
     )
 
     notes = Column(Text)
+    placed_at = Column(DateTime)
+    closed_at = Column(DateTime)
+    closed_by_staff_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("staff.staff_id"),
+        nullable=True,
+    )
 
     created_at = Column(
         DateTime,
@@ -71,4 +91,15 @@ class Internship(Base):
     mentor = relationship(
         "Mentor",
         backref="internships"
+    )
+
+    application = relationship(
+        "StudentApplication",
+        back_populates="internship",
+        uselist=False,
+    )
+
+    role_position = relationship(
+        "Position",
+        foreign_keys=[position_id],
     )

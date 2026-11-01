@@ -208,6 +208,7 @@ export const translations = {
         otpVerifyFailed: 'Failed to verify OTP. Please try again.',
         emailRequired: 'Email address is required',
         otpRequired: 'OTP code is required',
+        requestTimeout: 'Request timed out. Please try again.',
       },
 
       // Success Messages
@@ -524,6 +525,7 @@ export const translations = {
         otpVerifyFailed: 'ไม่สามารถตรวจสอบ OTP ได้ โปรดลองอีกครั้ง',
         emailRequired: 'จำเป็นต้องระบุที่อยู่อีเมล',
         otpRequired: 'จำเป็นต้องระบุรหัส OTP',
+        requestTimeout: 'หมดเวลาการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง',
       },
 
       // Success Messages

@@ -1,28 +1,25 @@
 """
-Email service for sending OTP codes via Mailpit SMTP
+Email service for sending OTP codes via the Resend API.
 """
 
-import smtplib
-import asyncio
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import logging
 from typing import Optional
 
 from app.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 class EmailService:
-    """บริการส่ง email ผ่าน SMTP (Mailpit)"""
-    
+    """บริการส่ง email ผ่าน Resend API"""
+   
     def __init__(self):
-        self.smtp_host = settings.EMAIL_HOST or "localhost"
-        self.smtp_port = settings.EMAIL_PORT or 1025
-        self.sender_email = settings.EMAIL_ADDRESS or "otp@ciswciehub.local"
-        self.sender_password = settings.EMAIL_PASSWORD or ""
-    
-    def _create_otp_email(self, recipient_email: str, otp: str, role: str) -> tuple[str, str]:
+        self.api_key = settings.RESEND_API_KEY
+        self.sender_email = settings.RESEND_FROM_EMAIL
+
+    def _create_otp_email(self, recipient_email: str, otp: str, role: str) -> tuple[str, str, str]:
         """
-        สร้าง email subject และ HTML body สำหรับ OTP
+        สร้าง email subject, HTML body และ plain text body สำหรับ OTP
         
         Args:
             recipient_email: อีเมลของผู้รับ
@@ -30,12 +27,12 @@ class EmailService:
             role: บทบาทของผู้ใช้ (student, teacher, staff)
         
         Returns:
-            tuple: (subject, html_body)
+            tuple: (subject, html_body, text_body)
         """
         role_display = {
             "student": "นักศึกษา",
             "teacher": "อาจารย์",
-            "staff": "เจ้าหน้าที่"
+            "staff": "เจ้าหน้าที่",
         }.get(role, role)
         
         subject = "🔐 รหัส OTP ของคุณ - CIS CWIE Hub"
@@ -46,7 +43,7 @@ class EmailService:
                 <meta charset="UTF-8">
                 <style>
                     body {{
-                        font-family: 'Segoe UI', Arial, sans-serif;
+                        font-family: ''Segoe UI'', Arial, sans-serif;
                         background-color: #f5f5f5;
                         margin: 0;
                         padding: 20px;
@@ -91,7 +88,7 @@ class EmailService:
                         font-weight: bold;
                         color: #007bff;
                         letter-spacing: 4px;
-                        font-family: 'Courier New', monospace;
+                        font-family: ''Courier New'', monospace;
                     }}
                     .otp-label {{
                         font-size: 12px;
@@ -130,95 +127,41 @@ class EmailService:
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🔐 CIS CWIE Hub</h1>
+                        <h1>📧 CIS CWIE Hub</h1>
                     </div>
-                    
+
                     <div class="content">
                         <p>สวัสดี,</p>
-                        
+
                         <p>คุณได้ขอรหัส OTP สำหรับการเข้าสู่ระบบ CIS CWIE Hub</p>
-                        
+
                         <div class="otp-box">
                             <div class="otp-code">{otp}</div>
                             <div class="otp-label">รหัส OTP จะหมดอายุภายใน 5 นาที</div>
                         </div>
-                        
+
                         <p>
                             บัญชี: <strong>{recipient_email}</strong>
                             <div class="role-badge">{role_display}</div>
                         </p>
-                        
+
                         <div class="warning">
-                            ⚠️ <strong>คำเตือน:</strong> อย่าแชร์รหัส OTP นี้กับใคร ทีม CIS CWIE Hub จะไม่เคยขออะไรจากคุณผ่านทาง email
+                            ⚠️ <strong>คำเตือน:</strong> อย่าแชร์รหัส OTP นี้กับใคร
                         </div>
-                        
+
                         <p>หากคุณไม่ได้ขอรหัส OTP นี้ กรุณาเพิกเฉยต่ออีเมลนี้</p>
                     </div>
-                    
+
                     <div class="footer">
                         <p>© 2026 CIS CWIE Hub. สงวนสิทธิ์ทั้งหมด</p>
-                        <p>นี่คือข้อความอัตโนมัติ กรุณาอย่าตอบกลับ</p>
+                        <p>อีเมลนี้ถูกส่งโดยอัตโนมัติจากระบบ CIS CWIE Hub</p>
                     </div>
                 </div>
             </body>
         </html>
         """
-        
-        return subject, html_body
-    
-    async def send_otp_email(
-        self,
-        recipient_email: str,
-        otp: str,
-        role: str
-    ) -> bool:
-        """
-        ส่ง OTP ไปยัง email ของผู้ใช้
-        
-        Args:
-            recipient_email: อีเมลปลายทาง
-            otp: รหัส OTP
-            role: บทบาทของผู้ใช้
-        
-        Returns:
-            bool: True ถ้าส่งสำเร็จ, False ถ้าล้มเหลว
-        """
-        try:
-            # Run SMTP operation in thread pool to avoid blocking
-            return await asyncio.to_thread(
-                self._send_smtp,
-                recipient_email,
-                otp,
-                role
-            )
-        except Exception as e:
-            print(f"❌ Error sending OTP email to {recipient_email}: {str(e)}")
-            return False
-    
-    def _send_smtp(self, recipient_email: str, otp: str, role: str) -> bool:
-        """
-        ส่ง email ผ่าน SMTP (synchronous operation)
-        
-        Args:
-            recipient_email: อีเมลปลายทาง
-            otp: รหัส OTP
-            role: บทบาทของผู้ใช้
-        
-        Returns:
-            bool: True ถ้าส่งสำเร็จ
-        """
-        try:
-            # สร้าง email
-            subject, html_body = self._create_otp_email(recipient_email, otp, role)
-            
-            # สร้าง message
-            message = MIMEMultipart("alternative")
-            message["Subject"] = subject
-            message["From"] = self.sender_email
-            message["To"] = recipient_email
-            
-            # เพิ่ม plain text version (fallback)
-            text_body = f"""
+
+        text_body = f"""
 สวัสดี,
 
 คุณได้ขอรหัส OTP สำหรับการเข้าสู่ระบบ CIS CWIE Hub
@@ -236,36 +179,62 @@ class EmailService:
 
 © 2026 CIS CWIE Hub. สงวนสิทธิ์ทั้งหมด
 """
-            
-            part1 = MIMEText(text_body, "plain", "utf-8")
-            part2 = MIMEText(html_body, "html", "utf-8")
-            
-            message.attach(part1)
-            message.attach(part2)
-            
-            # เชื่อมต่อกับ SMTP server และส่ง
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                # Mailpit ไม่ต้องใช้ TLS
-                # server.starttls()
-                
-                # Mailpit ไม่ต้อง authentication
-                # if self.sender_password:
-                #     server.login(self.sender_email, self.sender_password)
-                
-                server.sendmail(
-                    self.sender_email,
-                    recipient_email,
-                    message.as_string()
-                )
-            
-            print(f"✓ OTP email sent to {recipient_email}")
-            return True
+
+        return subject, html_body, text_body
+
+    async def send_otp_email(
+        self,
+        recipient_email: str,
+        otp: str,
+        role: str
+    ) -> bool:
+        """
+        ส่ง OTP ไปยัง email ของผู้ใช้ผ่าน Resend API
         
-        except smtplib.SMTPException as e:
-            print(f"❌ SMTP Error: {str(e)}")
+        Args:
+            recipient_email: อีเมลปลายทาง
+            otp: รหัส OTP
+            role: บทบาทของผู้ใช้
+        
+        Returns:
+            bool: True ถ้า Resend ยอมรับคำขอส่ง, False ถ้าล้มเหลว
+        """
+        # Never send without a configured API key and sender address
+        if not self.api_key:
+            logger.error("Resend is not configured: RESEND_API_KEY is missing")
             return False
+        if not self.sender_email:
+            logger.error("Resend is not configured: RESEND_FROM_EMAIL is missing")
+            return False
+
+        try:
+            # Lazy import so the app can start even before the resend package is installed
+            import resend  # type: ignore
+
+            resend.api_key = self.api_key
+            subject, html_body, text_body = self._create_otp_email(recipient_email, otp, role)
+
+            response = resend.Emails.send({
+                "from": self.sender_email,
+                "to": [recipient_email],
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+            })
+
+            # Resend accepts the request when it returns an id (object attribute or dict key)
+            accepted = bool(getattr(response, "id", None)) or (
+                isinstance(response, dict) and bool(response.get("id"))
+            )
+            if not accepted:
+                logger.error("Resend did not accept OTP email to %s: %s", recipient_email, response)
+                return False
+
+            logger.info("✓ OTP email accepted by Resend to %s", recipient_email)
+            return True
         except Exception as e:
-            print(f"❌ Error: {str(e)}")
+            # Do not log the OTP or the API key; only a safe error summary
+            logger.error("❌ Error sending OTP email to %s via Resend: %s", recipient_email, e)
             return False
 
 

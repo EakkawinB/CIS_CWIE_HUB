@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { ProtectedRoute } from '@/lib/protected-route'
+import { ProtectedRoute } from '@/components/protected-route'
 import { AuthHeader } from '@/components/auth-header'
 import { motion } from 'motion/react'
 
@@ -22,3 +22,4 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </ProtectedRoute>
   )
 }
+

@@ -19,3 +19,4 @@ alembic
 python-multipart
 
 redis
+resend>=2.0.0

@@ -7,7 +7,7 @@ from app.database import Base
 
 
 class Mentor(Base):
-    __tablename__ = "mentor"
+    __tablename__ = "mentors"
 
     mentor_id = Column(
         UUID(as_uuid=True),

@@ -6,7 +6,7 @@ import { ApiResponse } from './api'
 export interface AuthUser {
   email: string
   role: 'student' | 'teacher' | 'staff'
-  profile_id: number
+  profile_id: string | number
 }
 
 interface AuthContextType {
@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (email: string, otp: string) => Promise<void>
   logout: () => void
   refresh: () => Promise<void>
+  getToken: () => string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -58,17 +59,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authApi.verifyOtp(email, otp)
 
+      if (!response.access_token) {
+        throw new Error('No access token received from server')
+      }
+
       const userData: AuthUser = {
         email,
-        role: response.role as AuthUser['role'],
+        role: (response.role || 'student') as AuthUser['role'],
         profile_id: response.profile_id ?? 0,
       }
 
-      // Generate a simple token (in production, this should come from backend)
-      const token = btoa(`${email}:${Date.now()}`)
-
       localStorage.setItem(STORAGE_KEY, JSON.stringify(userData))
-      localStorage.setItem(TOKEN_KEY, token)
+      localStorage.setItem(TOKEN_KEY, response.access_token)
 
       setUser(userData)
       setIsAuthenticated(true)
@@ -101,6 +103,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [logout])
 
+  const getToken = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(TOKEN_KEY)
+    }
+    return null
+  }, [])
+
   const value: AuthContextType = {
     user,
     isLoading,
@@ -108,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     refresh,
+    getToken,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

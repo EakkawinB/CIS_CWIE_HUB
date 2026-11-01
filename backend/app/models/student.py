@@ -1,5 +1,3 @@
-# models/student.py
-
 import uuid
 from sqlalchemy import Column, ForeignKey, String, Boolean
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,54 +7,46 @@ from app.database import Base
 
 
 class Student(Base):
-    __tablename__ = "student"
+    __tablename__ = "students"
 
     student_id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-        default=uuid.uuid4
+        default=uuid.uuid4,
     )
 
     user_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.user_id"),
         unique=True,
-        nullable=False
+        nullable=False,
     )
 
     student_code = Column(String(20), unique=True)
-
     name = Column(String(100))
 
     email = Column(
         String(255),
         unique=True,
-        nullable=False
+        nullable=False,
     )
 
     is_active = Column(
         Boolean,
         default=True,
-        nullable=False
+        nullable=False,
     )
 
     company_id = Column(
         UUID(as_uuid=True),
         ForeignKey("companies.company_id"),
-        nullable=True
-    ) 
-
-    user = relationship(
-        "User",
-        backref="student"
+        nullable=True,
     )
 
-    company = relationship(
-        "Company",
-        back_populates="students"
-    )
+    user = relationship("User", backref="student")
+    company = relationship("Company", back_populates="students")
 
     advisor_assignments = relationship(
         "AdvisorStudentAssignment",
-        back_populates="student"
+        back_populates="student",
     )

@@ -6,8 +6,11 @@ export interface ApiResponse<T> {
   message?: string
   detail?: string
   role?: string
-  profile_id?: number
+  profile_id?: number | string
+  access_token?: string
+  token_type?: string
   status?: string
+  success?: boolean
 }
 
 export class ApiError extends Error {
@@ -19,6 +22,14 @@ export class ApiError extends Error {
     super(message)
     this.name = 'ApiError'
   }
+}
+
+// Helper function to get JWT token from localStorage
+function getAuthToken(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('cis_cwie_token')
+  }
+  return null
 }
 
 // Helper function to map backend error messages to translation keys
@@ -55,14 +66,22 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`
+  const token = getAuthToken()
+
+  const headers = new Headers(options.headers)
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
+  // Add authorization header if token exists
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
 
   try {
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     })
 
     if (!response.ok) {
@@ -77,6 +96,11 @@ async function request<T>(
   } catch (error) {
     if (error instanceof ApiError) {
       throw error
+    }
+
+    // Request aborted (timeout)
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new ApiError(408, 'login.errors.requestTimeout')
     }
 
     // Network error
@@ -98,10 +122,14 @@ async function request<T>(
 
 export const authApi = {
   // Request OTP
-  requestOtp: async (email: string): Promise<ApiResponse<void>> => {
+  requestOtp: async (
+    email: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<ApiResponse<void>> => {
     return request('/auth/request-otp', {
       method: 'POST',
       body: JSON.stringify({ email }),
+      signal: options?.signal,
     })
   },
 
@@ -109,10 +137,17 @@ export const authApi = {
   verifyOtp: async (
     email: string,
     otp: string
-  ): Promise<ApiResponse<{ role: string; profile_id: number }>> => {
+  ): Promise<ApiResponse<{ role: string; profile_id: number; access_token: string }>> => {
     return request('/auth/verify-otp', {
       method: 'POST',
       body: JSON.stringify({ email, otp }),
+    })
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    return request('/auth/me', {
+      method: 'GET',
     })
   },
 

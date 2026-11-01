@@ -10,6 +10,9 @@ from app.models.document import Document
 from app.models.otp import OTPCode
 from app.models.advisor import Advisor
 from app.models.position import Position
-from app.models.student_application import StudentApplication
 from app.models.advisor_student_assignment import AdvisorStudentAssignment
+from app.models.advisor_assignment import AdvisorStudentAssignment as AdvisorAssignment
 from app.models.internship import Internship
+from app.models.application import StudentApplication
+
+__all__ = ["Student", "AdvisorStudentAssignment"]

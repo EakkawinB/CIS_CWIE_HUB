@@ -9,7 +9,11 @@ from app.models.otp import OTPCode
 from app.services.email_service import get_email_service
 
 
-OTP_TTL = 300  # 5 นาที
+OTP_TTL = 180  # 3 นาที
+
+
+class EmailDeliveryError(Exception):
+    """อีเมล OTP ส่งไม่สำเร็จผ่านผู้ให้บริการอีเมล (Resend)"""
 
 
 def _key(email: str, role: str) -> str:
@@ -23,7 +27,7 @@ def _generate_otp(length: int = 6) -> str:
 async def create_otp(email: str, role: str, db: Session) -> str:
     """
     สร้าง OTP
-    - เก็บใน Redis (primary) TTL 5 นาที
+    - เก็บใน Redis (primary) TTL 3 นาที
     - บันทึกใน DB (audit log)
     - ส่ง OTP ผ่าน email
     """
@@ -43,12 +47,15 @@ async def create_otp(email: str, role: str, db: Session) -> str:
     db.add(record)
     db.commit()
 
-    # ส่ง email ผ่าน Mailpit
+    # ส่ง OTP ผ่าน Resend API
     email_service = get_email_service()
     send_success = await email_service.send_otp_email(email, otp, role)
-    
+
     if not send_success:
-        print(f"⚠️ Warning: Could not send OTP email to {email}, but OTP was created")
+        # Resend ไม่ยอมรับคำขอส่งอีเมล: ห้ามรายงานว่าส่งสำเร็จ
+        # เพิกถอน OTP ที่สร้างไว้เพื่อไม่ให้มีรหัสค้างอยู่ในระบบ
+        await revoke_otp(email, role)
+        raise EmailDeliveryError(f"ไม่สามารถส่งอีเมล OTP ไปยัง {email} ผ่าน Resend")
 
     return otp
 

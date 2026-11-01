@@ -1,6 +1,10 @@
+from datetime import datetime
 from sqlalchemy import (
+    Boolean,
     Column,
-    String
+    DateTime,
+    String,
+    Text,
 )
 
 from sqlalchemy.dialects.postgresql import UUID
@@ -38,8 +42,20 @@ class Company(Base):
         String
     )
 
-    # นักศึกษาที่ฝึกงานที่บริษัทนี้
+    province = Column(String)
+    website = Column(String)
+    industry = Column(String)
+    description = Column(Text)
+    logo_url = Column(String)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     students = relationship(
         "Student",
+        back_populates="company"
+    )
+    positions = relationship(
+        "Position",
         back_populates="company"
     )
