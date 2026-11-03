@@ -8,7 +8,7 @@ from fastapi import (
 )
 from datetime import datetime, timezone
 from pathlib import Path
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -23,6 +23,7 @@ from app.schemas.document import (
     ResumeResponse,
 )
 from app.core.dependencies import require_role
+from app.core.identity import get_student_for_user
 from app.services.storage_service import (
     create_signed_download_url,
     delete_file,
@@ -74,11 +75,7 @@ def get_my_documents(
     current_user=Depends(require_role("student")),
     db: Session = Depends(get_db)
 ):
-    user_id = UUID(current_user["sub"])
-
-    student = db.query(Student).filter(
-        Student.user_id == user_id
-    ).first()
+    student = get_student_for_user(db, current_user)
 
     if not student:
         raise HTTPException(
@@ -101,8 +98,7 @@ def get_my_resume(
     current_user=Depends(require_role("student")),
     db: Session = Depends(get_db)
 ):
-    user_id = UUID(current_user["sub"])
-    student = db.query(Student).filter(Student.user_id == user_id).first()
+    student = get_student_for_user(db, current_user)
 
     if not student:
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลนักศึกษา")
@@ -124,8 +120,7 @@ def upload_resume(
     current_user=Depends(require_role("student")),
     db: Session = Depends(get_db)
 ):
-    user_id = UUID(current_user["sub"])
-    student = db.query(Student).filter(Student.user_id == user_id).first()
+    student = get_student_for_user(db, current_user)
 
     if not student:
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลนักศึกษา")
@@ -210,8 +205,7 @@ def download_my_resume(
     current_user=Depends(require_role("student")),
     db: Session = Depends(get_db)
 ):
-    user_id = UUID(current_user["sub"])
-    student = db.query(Student).filter(Student.user_id == user_id).first()
+    student = get_student_for_user(db, current_user)
     if not student:
         raise HTTPException(status_code=404, detail="ไม่พบข้อมูลนักศึกษา")
 

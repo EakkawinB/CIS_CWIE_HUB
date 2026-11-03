@@ -12,6 +12,11 @@ from app.models.position import Position
 from app.models.staff import Staff
 from app.models.student import Student
 from app.models.user import User
+from app.core.identity import (
+    get_advisor_for_user as resolve_advisor_for_user,
+    get_staff_for_user as resolve_staff_for_user,
+    get_student_for_user as resolve_student_for_user,
+)
 from app.schemas.advisor_assignment import (
     ActiveAdvisorResponse,
     AdvisorAssignmentResponse,
@@ -26,30 +31,15 @@ def _full_name(first_name: str, last_name: str) -> str:
 
 
 def _get_staff_for_user(db: Session, current_user: dict) -> Staff:
-    staff = db.query(Staff).filter(
-        Staff.user_id == UUID(current_user["sub"])
-    ).first()
-    if staff is None:
-        raise HTTPException(status_code=404, detail="Staff profile not found")
-    return staff
+    return resolve_staff_for_user(db, current_user)
 
 
 def _get_advisor_for_user(db: Session, current_user: dict) -> Advisor:
-    advisor = db.query(Advisor).filter(
-        Advisor.user_id == UUID(current_user["sub"])
-    ).first()
-    if advisor is None:
-        raise HTTPException(status_code=404, detail="Advisor profile not found")
-    return advisor
+    return resolve_advisor_for_user(db, current_user)
 
 
 def _get_student_for_user(db: Session, current_user: dict) -> Student:
-    student = db.query(Student).filter(
-        Student.user_id == UUID(current_user["sub"])
-    ).first()
-    if student is None:
-        raise HTTPException(status_code=404, detail="Student profile not found")
-    return student
+    return resolve_student_for_user(db, current_user)
 
 
 def _assignment_query(db: Session):

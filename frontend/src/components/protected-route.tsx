@@ -3,18 +3,48 @@
 import { useEffect, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '../../lib/auth-context'
+import { normalizeRole, type AppRole } from '../../lib/rbac'
 import { motion } from 'motion/react'
 import { LoadingScreen } from '../components/loading-screen'
 
 interface ProtectedRouteProps {
   children: ReactNode
-  requiredRoles?: Array<'student' | 'teacher' | 'staff'>
+  /** Role(s) allowed to open this page. */
+  requiredRole?: AppRole | AppRole[]
+  /** Legacy prop name kept for backward compatibility. */
+  requiredRoles?: AppRole[]
 }
 
-export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
+function resolveRequiredRoles(
+  requiredRole: ProtectedRouteProps['requiredRole'],
+  requiredRoles: ProtectedRouteProps['requiredRoles']
+): AppRole[] | null {
+  if (requiredRoles && requiredRoles.length > 0) {
+    return requiredRoles
+  }
+
+  if (!requiredRole) {
+    return null
+  }
+
+  return Array.isArray(requiredRole) ? requiredRole : [requiredRole]
+}
+
+export function ProtectedRoute({
+  children,
+  requiredRole,
+  requiredRoles,
+}: ProtectedRouteProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { user, isLoading, isAuthenticated } = useAuth()
+
+  const allowedRoles = resolveRequiredRoles(requiredRole, requiredRoles)
+  const role = normalizeRole(user?.role)
+  const allowed =
+    allowedRoles === null
+      ? isAuthenticated
+      : role !== null && allowedRoles.includes(role)
 
   useEffect(() => {
     if (isLoading) return
@@ -26,10 +56,10 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     }
 
     // Check role-based access
-    if (requiredRoles && user && !requiredRoles.includes(user.role)) {
+    if (!allowed) {
       router.push('/unauthorized')
     }
-  }, [isLoading, isAuthenticated, user, router, pathname, requiredRoles])
+  }, [isLoading, isAuthenticated, allowed, router, pathname])
 
   if (isLoading) {
     return <LoadingScreen onComplete={function (): void {
@@ -51,7 +81,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     )
   }
 
-  if (requiredRoles && user && !requiredRoles.includes(user.role)) {
+  if (!allowed) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <motion.div

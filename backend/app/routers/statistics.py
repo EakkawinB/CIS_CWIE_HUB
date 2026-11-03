@@ -12,6 +12,7 @@ from app.models.student import Student
 from app.models.advisor import Advisor
 from app.models.company import Company
 from app.models.document import Document
+from app.models.user import User
 
 router = APIRouter(
     prefix="/statistics",
@@ -50,8 +51,12 @@ def get_statistics_overview(
     ).scalar() or 0
     
     # Get total active advisors
-    total_advisors = db.query(func.count(Advisor.advisor_id)).filter(
-        Advisor.is_active == True
+    # NOTE: public.advisors has no is_active column; the account state
+    # lives on public.users.is_active.
+    total_advisors = db.query(func.count(Advisor.advisor_id)).join(
+        User, Advisor.user_id == User.user_id
+    ).filter(
+        User.is_active == True
     ).scalar() or 0
     
     # Get total active companies

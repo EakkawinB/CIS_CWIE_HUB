@@ -3,7 +3,7 @@
 import { useLanguage } from '@/lib/language-context'
 
 const FlagUK = () => (
-  <svg width="18" height="13" viewBox="0 0 22 16" className="rounded-sm flex-shrink-0">
+  <svg width="18" height="13" viewBox="0 0 22 16" className="rounded-sm shrink-0">
     <rect width="22" height="16" fill="#012169" />
     <path d="M0,0 L22,16 M22,0 L0,16" stroke="#fff" strokeWidth="3" />
     <path d="M0,0 L22,16 M22,0 L0,16" stroke="#C8102E" strokeWidth="1.5" />
@@ -13,7 +13,7 @@ const FlagUK = () => (
 )
 
 const FlagTH = () => (
-  <svg width="18" height="13" viewBox="0 0 22 16" className="rounded-sm flex-shrink-0">
+  <svg width="18" height="13" viewBox="0 0 22 16" className="rounded-sm shrink-0">
     <rect width="22" height="16" fill="#A51931" />
     <rect y="2.67" width="22" height="10.67" fill="#F4F5F8" />
     <rect y="5.33" width="22" height="5.33" fill="#2D2A4A" />

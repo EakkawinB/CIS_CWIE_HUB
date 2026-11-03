@@ -1,12 +1,10 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.mentor import Mentor
 from app.schemas.mentor import MentorProfileResponse
 from app.core.dependencies import require_role
+from app.core.identity import get_mentor_for_user
 
 
 router = APIRouter(
@@ -23,11 +21,7 @@ def get_my_profile(
     current_user=Depends(require_role("mentor")),
     db: Session = Depends(get_db)
 ):
-    user_id = UUID(current_user["sub"])
-
-    mentor = db.query(Mentor).filter(
-        Mentor.user_id == user_id
-    ).first()
+    mentor = get_mentor_for_user(db, current_user)
 
     if not mentor:
         raise HTTPException(

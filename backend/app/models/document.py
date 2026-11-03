@@ -24,8 +24,8 @@ class Document(Base):
     )
 
     student_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("student.student_id"),
+        Integer,
+        ForeignKey("students.id"),
         nullable=False
     )
 

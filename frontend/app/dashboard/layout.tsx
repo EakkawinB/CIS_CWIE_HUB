@@ -7,7 +7,7 @@ import { motion } from 'motion/react'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRole="admin">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

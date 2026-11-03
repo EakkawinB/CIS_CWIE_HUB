@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { useLanguage } from '@/lib/language-context'
 import { getTranslation } from '@/lib/translations'
 import { authApi, ApiError } from '@/lib/api'
+import { homeRouteForRole } from '@/lib/rbac'
 import { OTPVerificationModal } from './otp-verification'
 
 // Inline helper functions for error translation and messages
@@ -154,7 +155,8 @@ export function LoginCard() {
       setSuccess(true)
       setSuccessMessage(getSuccessMessage('otpVerified', language))
       setTimeout(() => {
-        window.location.href = '/dashboard'
+        // RBAC: send each role to the area it is authorized to open.
+        window.location.href = homeRouteForRole(response.role)
       }, 1500)
     } catch (err) {
       setError(translateError(err, language))
@@ -191,7 +193,8 @@ export function LoginCard() {
 
       // Redirect after brief delay to show success message
       setTimeout(() => {
-        window.location.href = '/dashboard'
+        // RBAC: send each role to the area it is authorized to open.
+        window.location.href = homeRouteForRole(data.role)
       }, 1500)
     } catch (err) {
       setError(translateError(err, language))

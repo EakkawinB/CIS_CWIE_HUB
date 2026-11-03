@@ -11,7 +11,7 @@ const StudentPortalWrapper = dynamic(
     default: mod.default
   })),
   { 
-    loading: () => <LoadingScreen />,
+    loading: () => <LoadingScreen onComplete={() => {}} />,
     ssr: false 
   }
 )

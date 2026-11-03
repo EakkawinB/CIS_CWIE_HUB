@@ -62,8 +62,8 @@ class StudentApplication(Base):
         server_default=text("gen_random_uuid()"),
     )
     student_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("student.student_id"),
+        Integer,
+        ForeignKey("students.id"),
         nullable=False,
     )
     position_id = Column(
@@ -88,7 +88,7 @@ class StudentApplication(Base):
     rejection_reason = Column(Text, nullable=True)
     outcome_recorded_by = Column(
         UUID(as_uuid=True),
-        ForeignKey("staff.staff_id"),
+        ForeignKey("staffs.staff_id"),
         nullable=True,
     )
     outcome_recorded_at = Column(DateTime(timezone=True), nullable=True)

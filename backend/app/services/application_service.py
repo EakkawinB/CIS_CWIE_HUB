@@ -10,6 +10,10 @@ from app.models.internship import Internship
 from app.models.position import Position
 from app.models.staff import Staff
 from app.models.student import Student
+from app.core.identity import (
+    get_staff_for_user as resolve_staff_for_user,
+    get_student_for_user as resolve_student_for_user,
+)
 from app.schemas.application import (
     ApplicationCreate,
     InterviewAttendanceRequest,
@@ -22,21 +26,11 @@ from app.schemas.application import (
 
 
 def _get_student_for_user(db: Session, current_user: dict) -> Student:
-    student = db.query(Student).filter(
-        Student.user_id == UUID(current_user["sub"])
-    ).first()
-    if student is None:
-        raise HTTPException(status_code=404, detail="Student profile not found")
-    return student
+    return resolve_student_for_user(db, current_user)
 
 
 def _get_staff_for_user(db: Session, current_user: dict) -> Staff:
-    staff = db.query(Staff).filter(
-        Staff.user_id == UUID(current_user["sub"])
-    ).first()
-    if staff is None:
-        raise HTTPException(status_code=404, detail="Staff profile not found")
-    return staff
+    return resolve_staff_for_user(db, current_user)
 
 
 def _get_locked_application(db: Session, application_id: UUID) -> StudentApplication:

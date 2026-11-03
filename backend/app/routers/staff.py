@@ -1,12 +1,10 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.staff import Staff
 from app.schemas.staff import StaffProfileResponse
 from app.core.dependencies import require_role
+from app.core.identity import get_staff_for_user
 
 
 router = APIRouter(
@@ -23,11 +21,7 @@ def get_my_profile(
     current_user=Depends(require_role("staff")),
     db: Session = Depends(get_db)
 ):
-    user_id = UUID(current_user["sub"])
-
-    staff = db.query(Staff).filter(
-        Staff.user_id == user_id
-    ).first()
+    staff = get_staff_for_user(db, current_user)
 
     if not staff:
         raise HTTPException(

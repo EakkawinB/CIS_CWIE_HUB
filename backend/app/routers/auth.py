@@ -4,16 +4,25 @@ from typing import Optional
 
 from app.database import get_db
 from app.models.student import Student
-from app.models.teacher import Teacher
 from app.models.staff import Staff
 from app.models.advisor import Advisor
 from app.models.mentor import Mentor
+from app.models.user import User
 
 from app.schemas.auth import OTPRequest, OTPVerify
 
 from app.services.otp_service import create_otp, verify_otp, EmailDeliveryError
 from app.core.security import create_access_token
 from app.core.dependencies import get_current_user
+from app.core.rbac import (
+    ROLE_ADMIN,
+    ROLE_ADVISOR,
+    ROLE_MENTOR,
+    ROLE_STAFF,
+    ROLE_STUDENT,
+    normalize_role,
+    permissions_for_role,
+)
 
 
 router = APIRouter(
@@ -22,47 +31,92 @@ router = APIRouter(
 )
 
 
+def _profile_for_role(db: Session, role: str, user: User):
+    """
+    หา profile row ของ role ที่ระบุจาก user ที่ login อยู่
+    ใช้ user_id เป็นหลัก และ fallback เป็น email สำหรับนักศึกษา
+    """
+    if role == ROLE_STUDENT:
+        student = db.query(Student).filter(
+            Student.user_id == user.user_id
+        ).first()
+        if student is None:
+            student = db.query(Student).filter(
+                Student.email == user.email
+            ).first()
+        return student
+
+    if role == ROLE_ADVISOR:
+        return db.query(Advisor).filter(
+            Advisor.user_id == user.user_id
+        ).first()
+
+    if role == ROLE_MENTOR:
+        return db.query(Mentor).filter(
+            Mentor.user_id == user.user_id
+        ).first()
+
+    if role == ROLE_STAFF:
+        return db.query(Staff).filter(
+            Staff.user_id == user.user_id
+        ).first()
+
+    return None
+
+
+def _profile_id(role: str, profile) -> Optional[str]:
+    """คืนค่า profile_id ที่ใช้เป็น JWT subject ของแต่ละ role"""
+    if role == ROLE_STUDENT:
+        student_code = getattr(profile, "student_id", None)
+        if student_code:
+            return str(student_code)
+        return str(profile.id)
+
+    if role == ROLE_ADVISOR:
+        return str(profile.advisor_id)
+
+    if role == ROLE_MENTOR:
+        return str(profile.mentor_id)
+
+    if role == ROLE_STAFF:
+        return str(profile.staff_id)
+
+    return None
+
+
 def _lookup_role(email: str, db: Session) -> Optional[tuple[str, str]]:
     """
     หา role และ profile_id จาก email
+
+    role มาจาก users.role ซึ่งเป็นแหล่งข้อมูลฝั่ง server ที่เชื่อถือได้
+    (ไม่รับ role จาก client) และถูก normalize เพื่อรองรับข้อมูลเดิม
     return (role, profile_id) หรือ None ถ้าไม่เจอ
     """
-    student = db.query(Student).filter(
-        Student.email == email,
-        Student.is_active == True
+    user = db.query(User).filter(
+        User.email == email,
+        User.is_active == True
     ).first()
-    if student:
-        return "student", str(student.student_id)
 
-    advisor = db.query(Advisor).filter(
-        Advisor.email == email,
-        Advisor.is_active == True
-    ).first()
-    if advisor:
-        return "advisor", str(advisor.advisor_id)
+    if user is None:
+        return None
 
-    mentor = db.query(Mentor).filter(
-        Mentor.email == email,
-        Mentor.is_active == True
-    ).first()
-    if mentor:
-        return "mentor", str(mentor.mentor_id)
+    role = normalize_role(user.role)
+    if role is None:
+        return None
 
-    staff = db.query(Staff).filter(
-        Staff.email == email,
-        Staff.is_active == True
-    ).first()
-    if staff:
-        return "staff", str(staff.staff_id)
+    # admin ไม่มี profile table แยก ใช้ user_id เป็น subject
+    if role == ROLE_ADMIN:
+        return ROLE_ADMIN, str(user.user_id)
 
-    teacher = db.query(Teacher).filter(
-        Teacher.email == email,
-        Teacher.is_active == True
-    ).first()
-    if teacher:
-        return "teacher", str(teacher.teacher_id)
+    profile = _profile_for_role(db, role, user)
+    if profile is None:
+        return None
 
-    return None
+    profile_id = _profile_id(role, profile)
+    if profile_id is None:
+        return None
+
+    return role, profile_id
 
 
 @router.post("/request-otp")
@@ -187,5 +241,9 @@ async def get_current_user_info(
             "email": current_user.get("email"),
             "role": current_user.get("role"),
             "profile_id": current_user.get("sub"),
+            # RBAC: permissions granted to the authenticated role
+            "permissions": sorted(
+                permissions_for_role(current_user.get("role"))
+            ),
         }
     }

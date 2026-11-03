@@ -3,12 +3,13 @@
 import { useEffect, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from './auth-context'
+import type { AppRole } from './rbac'
 import { motion } from 'motion/react'
 import { LoadingScreen } from '@/components/loading-screen'
 
 interface ProtectedRouteProps {
   children: ReactNode
-  requiredRoles?: Array<'student' | 'teacher' | 'staff'>
+  requiredRoles?: AppRole[]
 }
 
 export function ProtectedRoute({
@@ -35,7 +36,9 @@ export function ProtectedRoute({
   }, [isLoading, isAuthenticated, user, router, pathname, requiredRoles])
 
   if (isLoading) {
-    return <LoadingScreen />
+    return <LoadingScreen onComplete={function (): void {
+      throw new Error('Function not implemented.')
+    } } />
   }
 
   if (!isAuthenticated) {

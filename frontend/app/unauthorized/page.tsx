@@ -3,8 +3,15 @@
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { Shield, ArrowLeft } from 'lucide-react'
+import { useAuth } from '@/lib/auth-context'
+import { homeRouteForRole } from '@/lib/rbac'
 
 export default function UnauthorizedPage() {
+  const { user, isAuthenticated } = useAuth()
+  // RBAC: send the user back to the area their own role can open so the
+  // "back" action never loops back into this page.
+  const homeRoute = isAuthenticated ? homeRouteForRole(user?.role) : '/login'
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -41,7 +48,7 @@ export default function UnauthorizedPage() {
           {/* Action Buttons */}
           <div className="space-y-3">
             <Link
-              href="/dashboard"
+              href={homeRoute}
               className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold transition hover:opacity-90"
             >
               <ArrowLeft className="size-4" />

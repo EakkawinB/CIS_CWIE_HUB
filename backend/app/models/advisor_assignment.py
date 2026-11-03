@@ -3,6 +3,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     PrimaryKeyConstraint,
     UniqueConstraint,
     func,
@@ -30,6 +31,7 @@ class AdvisorStudentAssignment(Base):
             "advisor_id",
         ),
     )
+    extend_existing = True
 
     assignment_id = Column(
         UUID(as_uuid=True),
@@ -37,9 +39,9 @@ class AdvisorStudentAssignment(Base):
         server_default=text("gen_random_uuid()"),
     )
     student_id = Column(
-        UUID(as_uuid=True),
+        Integer,
         ForeignKey(
-            "student.student_id",
+            "students.id",
             name="advisor_student_assignments_student_id_fkey",
         ),
         nullable=False,
@@ -55,7 +57,7 @@ class AdvisorStudentAssignment(Base):
     assigned_by_staff_id = Column(
         UUID(as_uuid=True),
         ForeignKey(
-            "staff.staff_id",
+            "staffs.staff_id",
             name="advisor_student_assignments_assigned_by_staff_id_fkey",
         ),
         nullable=True,

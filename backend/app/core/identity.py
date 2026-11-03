@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Session
 
 from app.models.advisor import Advisor
@@ -10,21 +11,63 @@ from app.models.student import Student
 from app.models.teacher import Teacher
 
 
-def parse_subject(current_user: dict) -> UUID:
+def parse_subject(current_user: dict) -> str:
+    """Return the raw JWT subject as a string.
+
+    The subject is the profile primary key. For students this is the human
+    readable student code (a string such as ``6504062663117``), for
+    advisors/mentors/staff it is a UUID. Callers must not assume a UUID.
+    """
     try:
-        return UUID(str(current_user["sub"]))
-    except (KeyError, TypeError, ValueError):
+        subject = current_user["sub"]
+    except (KeyError, TypeError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token subject",
         )
 
+    if subject is None or str(subject).strip() == "":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token subject",
+        )
 
-def _by_subject(query, primary_attr, user_id_attr, subject: UUID):
-    record = query.filter(primary_attr == subject).first()
-    if record is None:
-        record = query.filter(user_id_attr == subject).first()
-    return record
+    return str(subject)
+
+
+def _as_uuid(value: str) -> UUID | None:
+    try:
+        return UUID(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _is_uuid_column(column) -> bool:
+    return isinstance(column.type, PGUUID)
+
+
+def _by_subject(query, primary_attr, user_id_attr, subject: str):
+    """Resolve a profile row by profile primary key, then by ``user_id``.
+
+    Comparisons are only attempted when the value type matches the column
+    type, so a student code is never compared against a UUID column.
+    """
+    subject_uuid = _as_uuid(subject)
+
+    if _is_uuid_column(primary_attr):
+        if subject_uuid is not None:
+            record = query.filter(primary_attr == subject_uuid).first()
+            if record is not None:
+                return record
+    else:
+        record = query.filter(primary_attr == subject).first()
+        if record is not None:
+            return record
+
+    if _is_uuid_column(user_id_attr) and subject_uuid is not None:
+        return query.filter(user_id_attr == subject_uuid).first()
+
+    return None
 
 
 def get_student_for_user(db: Session, current_user: dict) -> Student:

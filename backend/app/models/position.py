@@ -28,7 +28,6 @@ class Position(Base):
 
     description = Column(String)
 
-    department = Column(String(100))
     requirements = Column(JSONB)
     salary = Column(Numeric(10, 2))
     project_topic = Column(String)

@@ -2,10 +2,11 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { ApiResponse } from './api'
+import type { AppRole } from './rbac'
 
 export interface AuthUser {
   email: string
-  role: 'student' | 'teacher' | 'staff'
+  role: AppRole
   profile_id: string | number
 }
 

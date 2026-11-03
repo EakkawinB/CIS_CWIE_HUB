@@ -1,7 +1,7 @@
 # models/staff.py
 
 import uuid
-from sqlalchemy import Column, ForeignKey, String, Boolean
+from sqlalchemy import Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -20,25 +20,18 @@ class Staff(Base):
     user_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.user_id"),
-        nullable=False,
+        nullable=True,
         unique=True
     )
 
-    name = Column(String(100))
-
-    email = Column(
-        String(255),
-        unique=True,
-        nullable=False
-    )
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
 
     department = Column(String(100))
+    phone = Column(String(50))
 
-    is_active = Column(
-        Boolean,
-        default=True,
-        nullable=False
-    )
+    created_at = Column(DateTime(timezone=True))
+    updated_at = Column(DateTime(timezone=True))
 
     user = relationship(
         "User",
