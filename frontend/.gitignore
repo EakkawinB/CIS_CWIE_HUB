@@ -114,3 +114,47 @@ temp/
 # ============================
 .storybook/
 storybook-static/
+
+# ============================
+# !! SECURITY - environment & secrets !!
+# ============================
+.env
+.env.*
+!*.env.example
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+credentials.json
+*credential*.json
+service-account*.json
+*serviceAccount*.json
+*.token
+*.secret
+*.secrets
+secrets.json
+.secrets/
+.npmrc
+
+# ============================
+# Node / Next.js extras
+# ============================
+.swc/
+.pnpm-store/
+.pnpm-debug.log*
+.npm/
+.yarn/cache
+.yarn/unplugged
+.turbo/
+.vercel/
+*.local
+
+# ============================
+# Keep reproducible builds & Next.js types tracked
+# (overrides the rules above, which would otherwise hide them)
+# ============================
+!package-lock.json
+!next-env.d.ts

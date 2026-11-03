@@ -79,3 +79,66 @@ temp/
 *~
 
 run_backend.ps1
+
+# ============================
+# !! SECURITY - environment & secrets !!
+# ============================
+.env
+.env.*
+!*.env.example
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+credentials.json
+*credential*.json
+service-account*.json
+*serviceAccount*.json
+*.token
+*.secret
+*.secrets
+secrets.json
+secrets.yaml
+secrets.yml
+.secrets/
+.npmrc
+.pypirc
+.pgpass
+
+# ============================
+# Data dumps & backups
+# ============================
+*.dump
+*.sql.gz
+*.backup
+*.orig
+*.rej
+
+# ============================
+# Python tooling caches / reports
+# ============================
+.venv/
+venv.bak/
+env.bak/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.nox/
+.pytest_cache/
+coverage.xml
+*.cover
+pip-log.txt
+pip-delete-this-directory.txt
+cython_debug/
+
+# ============================
+# Keep the Alembic entrypoint visible
+# (the "env.py" rule above would otherwise hide alembic/env.py)
+# ============================
+!alembic/env.py

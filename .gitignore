@@ -89,3 +89,111 @@ dist/
 build/
 .next/
 out/
+
+# ============================
+# !! SECURITY - secrets & credentials (never commit) !!
+# ============================
+# All environment variants, while keeping the documented template tracked
+.env
+.env.*
+.envrc
+!*.env.example
+!**/.env.example
+!.env.example
+
+# Private keys / certificates
+*.pem
+*.key
+*.der
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# Credential, token and service-account files
+.netrc
+.npmrc
+.pypirc
+.pgpass
+.htpasswd
+credentials.json
+*credential*.json
+service-account*.json
+*serviceAccount*.json
+gcloud-key*.json
+firebase-adminsdk*.json
+*.key.json
+*.token
+*.secret
+*.secrets
+secrets.json
+secrets.yaml
+secrets.yml
+secrets/
+.secrets/
+
+# Shell history / logs that may contain secrets
+.bash_history
+.zsh_history
+.psql_history
+
+# Local tool state that can hold credentials
+.aws/
+.azure/
+.gcloud/
+.kube/
+.docker/
+.vercel/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.pnpm-debug.log*
+
+# ============================
+# Data dumps & backups (contain production data)
+# NOTE: plain *.sql is NOT ignored on purpose (Supabase/Alembic SQL scripts)
+# ============================
+*.dump
+*.sql.gz
+*.bak
+*.backup
+*.orig
+*.rej
+
+# ============================
+# Test / lint caches & coverage
+# ============================
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.tsbuildinfo
+.eslintcache
+
+# ============================
+# Editor / OS leftovers (extra)
+# ============================
+.vs/
+*.iml
+*.sublime-workspace
+.history/
+.fleet/
+ehthumbs.db
+Desktop.ini
+desktop.ini
+*.lnk
+*.stackdump
+.fuse_hidden*
+.nfs*
